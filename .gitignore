@@ -1,0 +1,19 @@
+# Jupyter Notebook autosave checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Manual backup copies
+*.bak
+*.orig
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
