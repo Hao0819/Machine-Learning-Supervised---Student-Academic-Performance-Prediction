@@ -117,6 +117,15 @@ The held-out test set is used for final evaluation, not for fitting preprocessin
 
 `ColumnTransformer` and `Pipeline` combine preprocessing and model training. This ensures that imputation, encoding, scaling, and feature selection learn only from the relevant training data during cross-validation.
 
+### Feature engineering
+
+The Decision Tree notebook derives two additional features from existing columns:
+
+- `Support_Index` sums the ordinal codes of `Parental_Involvement`, `Access_to_Resources`, and `Teacher_Quality`.
+- `Study_Consistency` multiplies `Hours_Studied` by `Attendance` and divides by 100.
+
+Both are computed row by row, so no information crosses between records and the train/test split remains valid.
+
 ## Model implementations
 
 ### Decision Tree
@@ -127,15 +136,20 @@ The Decision Tree learns hierarchical decision rules from student features. `Gri
 - Maximum tree depth
 - Minimum samples required to split a node
 - Minimum samples required in a leaf
+- Cost-complexity pruning parameter `ccp_alpha`
 
 Best parameters in the current run:
 
 ```text
 criterion = gini
-max_depth = 10
-min_samples_leaf = 2
+max_depth = None
+min_samples_leaf = 5
 min_samples_split = 2
+ccp_alpha = 0.0005
 ```
+
+Instead of limiting the depth in advance, the selected model grows the tree fully and then
+prunes it with `ccp_alpha`, which produced a higher cross-validated macro F1 (0.7699).
 
 ### K-Nearest Neighbors
 
@@ -196,7 +210,7 @@ All values below come from the saved outputs in the current notebooks.
 
 | Model | Test accuracy | Balanced accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |
 |---|---:|---:|---:|---:|---:|---:|
-| Decision Tree | 75.34% | 73.85% | 74.60% | 73.85% | 74.14% | 75.26% |
+| Decision Tree | 77.31% | 75.76% | 76.72% | 75.76% | 76.20% | 77.22% |
 | KNN | 82.30% | 77.89% | 85.28% | 77.89% | 80.68% | 81.99% |
 | Logistic Regression | **96.82%** | **96.45%** | **96.91%** | **96.45%** | **96.68%** | **96.82%** |
 
@@ -210,9 +224,9 @@ Rows are actual classes and columns are predicted classes.
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 192 | 95 | 4 |
-| Medium | 67 | 553 | 86 |
-| High | 3 | 71 | 251 |
+| Low | 194 | 97 | 0 |
+| Medium | 74 | 567 | 65 |
+| High | 1 | 63 | 261 |
 
 #### KNN
 
