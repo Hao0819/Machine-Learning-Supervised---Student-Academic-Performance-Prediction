@@ -196,7 +196,7 @@ All values below come from the saved outputs in the current notebooks.
 
 | Model | Test accuracy | Balanced accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |
 |---|---:|---:|---:|---:|---:|---:|
-| Decision Tree | 75.34% | 73.85% | 74.60% | 73.85% | 74.14% | 75.26% |
+| Decision Tree | 74.81% | 72.70% | 74.60% | 72.70% | 73.49% | 74.67% |
 | KNN | 82.30% | 77.89% | 85.28% | 77.89% | 80.68% | 81.99% |
 | Logistic Regression | **96.82%** | **96.45%** | **96.91%** | **96.45%** | **96.68%** | **96.82%** |
 
@@ -210,9 +210,9 @@ Rows are actual classes and columns are predicted classes.
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 192 | 95 | 4 |
-| Medium | 67 | 553 | 86 |
-| High | 3 | 71 | 251 |
+| Low | 184 | 107 | 0 |
+| Medium | 64 | 559 | 83 |
+| High | 1 | 78 | 246 |
 
 #### KNN
 
