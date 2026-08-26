@@ -249,10 +249,22 @@ Rows are actual classes and columns are predicted classes.
 ```text
 .
 |-- README.md
+|-- requirements.txt
 |-- StudentPerformanceFactors.csv
 |-- decisionTree.ipynb
 |-- KNN.ipynb
-`-- LogisticRegression.ipynb
+|-- LogisticRegression.ipynb
+|-- app.py                 web interface (Logistic Regression), needs Python + Flask
+|-- run_app.bat            Windows launcher for app.py
+|-- predictor.html         standalone interface, double-click to open, no install needed
+|-- build_predictor.py     regenerates predictor.html from the trained model
+|-- verify_predictor.js    checks predictor.html against scikit-learn (needs Node)
+|-- templates/
+|   |-- layout.html
+|   |-- index.html
+|   `-- result.html
+`-- static/
+    `-- style.css
 ```
 
 Jupyter checkpoint files and local `.bak` files are development artifacts and are not required for submission.
@@ -265,11 +277,18 @@ Jupyter checkpoint files and local `.bak` files are development artifacts and ar
 - NumPy
 - Matplotlib
 - scikit-learn
+- Flask (only for the web interface)
 
-Install the main dependencies with:
+Install everything with:
 
 ```bash
-pip install pandas numpy matplotlib scikit-learn jupyter
+pip install -r requirements.txt
+```
+
+Or install the packages individually:
+
+```bash
+pip install pandas numpy matplotlib scikit-learn jupyter flask
 ```
 
 ## How to run
@@ -291,6 +310,80 @@ jupyter notebook
 ```
 
 KNN performs 960 cross-validation fits in its current search grid, so it may take longer to run than the other notebooks.
+
+## How to run the web interface
+
+`app.py` is a small Flask application that lets a student enter their own factors in a browser
+and receive a predicted performance class together with an explanation of the result. It loads
+the same pipeline, the same engineered features, and the same tuned hyperparameters used in
+`LogisticRegression.ipynb`, so the prediction on screen matches the notebook.
+
+**Windows:** double-click `run_app.bat`.
+
+**Any operating system:** open a terminal in this folder and run
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+The window prints the address to open, normally <http://127.0.0.1:5000>. If port 5000 is already
+in use the app moves to the next free port and prints that address instead.
+
+Notes:
+
+- The model is trained when the app starts, which takes a few seconds. Wait for the line
+  `Model ready.` before opening the browser.
+- Keep the terminal window open while using the app. Closing it, or pressing `CTRL+C`, stops the
+  server, and the browser will then report `ERR_CONNECTION_REFUSED`.
+- `StudentPerformanceFactors.csv` must stay in the same folder as `app.py`. The path is resolved
+  relative to `app.py`, so the app can be started from any working directory.
+- If `python` is not recognised, use the full path to your interpreter, for example
+  `"%USERPROFILE%\anaconda3\python.exe" app.py` on Windows.
+
+### Standalone version: `predictor.html`
+
+`predictor.html` is the same interface as a single self-contained file. **Double-click it and it
+opens in any browser.** It needs no Python, no Flask, no terminal, and no installation, so it can
+be copied to another computer or sent to someone directly.
+
+This works because Logistic Regression predicts with a plain weighted sum. `build_predictor.py`
+trains the model, exports the imputation values, the scaler statistics, the one-hot category
+order, and the fitted coefficients into the page, and the page applies them in the same order in
+JavaScript.
+
+To regenerate it after retraining the model:
+
+```bash
+python build_predictor.py     # writes predictor.html and predictor_check.json
+node verify_predictor.js      # checks the page against scikit-learn (optional)
+```
+
+The verification runs all 1,322 held-out test students through the JavaScript in the page and
+compares each result with the prediction scikit-learn produced for the same student. The current
+build reports **0 mismatches** and a largest probability difference of **1.55e-15**, which is
+ordinary floating-point rounding, so the page and the notebook give the same answers.
+
+| | `app.py` (Flask) | `predictor.html` (standalone) |
+|---|---|---|
+| Needs Python and Flask | Yes | No |
+| Needs a terminal | Yes | No |
+| Can be sent to someone else | They must install and run it | Yes, it is one file |
+| Runs the live scikit-learn model | Yes | No, it uses the exported coefficients |
+| Must be rebuilt after retraining | No | Yes, run `build_predictor.py` |
+
+### What the interface does
+
+| Page | Contents |
+|---|---|
+| Input form | The 19 student factors, grouped into Academic, Personal, Family, and School. Numeric fields show the range accepted by the model; categorical fields are dropdowns. |
+| Result | The predicted class, the probability of each of Low, Medium, and High, and the model's confidence. |
+| Explanation | The contribution of each factor to the result, split into factors that supported the predicted class and factors that worked against it, measured against an average student in the training data. |
+| What-if analysis | Realistic changes re-run through the model one at a time, showing which would most improve the predicted class. |
+
+All input is validated on the server: every field is required, numeric values must fall inside the
+range seen in training, and categorical values must be one of the categories seen in training.
+Invalid submissions return to the form with the specific field highlighted.
 
 ## Avoiding data leakage
 

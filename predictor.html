@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Academic Performance Prediction</title>
+<style>
+/* Student Academic Performance Prediction - interface styles */
+
+:root {
+    --page: #f4f6fa;
+    --card: #ffffff;
+    --ink: #1c2536;
+    --muted: #5d6b82;
+    --line: #dde3ed;
+    --brand: #2f5d8c;
+    --brand-dark: #234869;
+    --good: #2f855a;
+    --good-soft: #d6f0e2;
+    --warn: #b7791f;
+    --bad: #b03a3a;
+    --bad-soft: #fadfdf;
+    --low: #d97706;
+    --medium: #2f6fb0;
+    --high: #2f855a;
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0 0 60px;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+}
+
+.page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ---------- header ---------- */
+
+.masthead {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+    color: #ffffff;
+    padding: 28px 0 24px;
+    margin-bottom: 26px;
+}
+
+.masthead h1 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    letter-spacing: 0.2px;
+}
+
+.masthead p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.badges {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12.5px;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 22px;
+}
+
+.card h2 {
+    margin: 0 0 4px;
+    font-size: 19px;
+}
+
+.card h3 {
+    margin: 22px 0 10px;
+    font-size: 16px;
+}
+
+.card .lead {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.notice {
+    background: #fff8e6;
+    border: 1px solid #f0dca8;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* ---------- form ---------- */
+
+fieldset {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 0 0 8px;
+    padding: 18px 0 4px;
+}
+
+fieldset:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--brand);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.field label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--ink);
+}
+
+.field input:focus,
+.field select:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+    border-color: var(--brand);
+}
+
+.field .hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.field.has-error input,
+.field.has-error select {
+    border-color: var(--bad);
+    background: #fff7f7;
+}
+
+.field .error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--bad);
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.button {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    border: 1px solid var(--brand);
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button:hover {
+    background: var(--brand-dark);
+}
+
+.button.secondary {
+    background: #fff;
+    color: var(--brand);
+}
+
+.button.secondary:hover {
+    background: #eef3f9;
+}
+
+/* ---------- result ---------- */
+
+.verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    margin-bottom: 20px;
+}
+
+.verdict.Low {
+    background: #fff5e8;
+    border-color: #f2d0a4;
+}
+
+.verdict.Medium {
+    background: #eef4fb;
+    border-color: #bdd4ec;
+}
+
+.verdict.High {
+    background: #eaf7f0;
+    border-color: #b3e0c8;
+}
+
+.verdict .class-name {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.verdict.Low .class-name { color: var(--low); }
+.verdict.Medium .class-name { color: var(--medium); }
+.verdict.High .class-name { color: var(--high); }
+
+.verdict .detail {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 620px;
+}
+
+.probability {
+    margin-bottom: 12px;
+}
+
+.probability .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.probability .name {
+    width: 74px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.probability .track {
+    display: block;
+    flex: 1;
+    background: #eceff5;
+    border-radius: 999px;
+    height: 15px;
+    overflow: hidden;
+}
+
+/* display:block is required: a span is inline by default, and an inline element
+   ignores width and height, so the coloured bar would never be drawn. */
+.probability .fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.probability .fill.Low { background: var(--low); }
+.probability .fill.Medium { background: var(--medium); }
+.probability .fill.High { background: var(--high); }
+
+.probability .value {
+    width: 62px;
+    text-align: right;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- explanation ---------- */
+
+.factors {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.factors th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding: 0 10px 7px 0;
+}
+
+.factors td {
+    padding: 9px 10px 9px 0;
+    border-bottom: 1px solid #eef1f6;
+    vertical-align: middle;
+}
+
+.factors .factor-name {
+    font-weight: 600;
+}
+
+.factors .factor-value {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.factors .bar-cell {
+    width: 180px;
+}
+
+.factors .bar {
+    height: 11px;
+    border-radius: 999px;
+    min-width: 3px;
+}
+
+.factors .bar.positive { background: var(--good); }
+.factors .bar.negative { background: var(--bad); }
+
+.factors .amount {
+    width: 66px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 26px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.tag.positive {
+    background: var(--good-soft);
+    color: var(--good);
+}
+
+.tag.negative {
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+/* ---------- suggestions ---------- */
+
+.suggestion {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--brand);
+    border-radius: 7px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.suggestion.flip {
+    border-left-color: var(--good);
+    background: #f4fbf7;
+}
+
+.suggestion .gain {
+    color: var(--muted);
+    font-size: 13px;
+    display: block;
+    margin-top: 3px;
+}
+
+/* ---------- answers ---------- */
+
+details {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 12px 15px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.answers {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 12px;
+}
+
+.answers td {
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid #eef1f6;
+}
+
+.answers td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+    padding-top: 4px;
+}
+
+.footer code {
+    background: #e8ecf3;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.disclaimer {
+    background: #f0f3f8;
+    border-radius: 7px;
+    padding: 12px 15px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+    .verdict .class-name { font-size: 28px; }
+    .factors .bar-cell { width: 90px; }
+}
+
+.suggestion .steps {
+    margin: 8px 0 4px;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: var(--ink);
+}
+
+.suggestion .steps li {
+    margin-bottom: 3px;
+}
+
+</style>
+</head>
+<body>
+
+<header class="masthead">
+    <div class="page">
+        <h1>Student Academic Performance Prediction</h1>
+        <p>BMCS2203 Artificial Intelligence &middot; Multiclass Logistic Regression</p>
+        <div class="badges">
+            <span class="badge">Best model: Logistic Regression (C=100, solver=lbfgs)</span>
+            <span class="badge">Test accuracy 96.97%</span>
+            <span class="badge">Macro F1 96.82%</span>
+            <span class="badge">1322 held-out students</span>
+        </div>
+    </div>
+</header>
+
+<main class="page">
+
+<div class="notice" id="notice" style="display:none"></div>
+
+<form class="card" id="predict-form" novalidate>
+    <h2>Enter the student details</h2>
+    <p class="lead">
+        Fill in the 19 factors below and the model will predict whether this student's
+        academic performance is Low, Medium, or High, and explain which factors led to
+        that result. Every field is required, and numeric values must stay inside the
+        range covered by the training data.
+    </p>
+
+    <div id="form-fields"></div>
+
+    <div class="actions">
+        <button class="button" type="submit">Predict performance</button>
+        <button class="button secondary" type="button" id="reset">Reset the form</button>
+    </div>
+</form>
+
+<div id="results" style="display:none"></div>
+
+<div class="card">
+    <h2>How the prediction is made</h2>
+    <p class="lead" style="margin-bottom:0">
+        Your answers are processed exactly as they were during training: missing values are
+        imputed, categorical answers are one-hot encoded, and numeric values are standardized.
+        Two extra features are then calculated from your answers &mdash;
+        <strong>Support Index</strong> (parental involvement + access to resources + teacher
+        quality) and <strong>Study Consistency</strong> (hours studied &times; attendance).
+        Logistic Regression scores each of the three classes and the highest score wins, so
+        the result can be traced back to the exact contribution of each factor.
+    </p>
+</div>
+
+<p class="footer">
+    Trained on 5285 students from StudentPerformanceFactors.csv.
+    This page contains the coefficients of the model selected in LogisticRegression.ipynb and
+    calculates the prediction in the browser, so it needs no server and no installation.
+</p>
+
+</main>
+
+<script id="model-data" type="application/json">{"classes":["High","Low","Medium"],"displayOrder":["Low","Medium","High"],"classRank":{"Low":0,"Medium":1,"High":2},"numericFeatures":["Hours_Studied","Attendance","Sleep_Hours","Previous_Scores","Tutoring_Sessions","Physical_Activity","Support_Index","Study_Consistency"],"categoricalFeatures":["Parental_Involvement","Access_to_Resources","Extracurricular_Activities","Motivation_Level","Internet_Access","Family_Income","Teacher_Quality","School_Type","Peer_Influence","Learning_Disabilities","Parental_Education_Level","Distance_from_Home","Gender"],"inputNumeric":["Hours_Studied","Attendance","Sleep_Hours","Previous_Scores","Tutoring_Sessions","Physical_Activity"],"inputCategorical":["Parental_Involvement","Access_to_Resources","Extracurricular_Activities","Motivation_Level","Internet_Access","Family_Income","Teacher_Quality","School_Type","Peer_Influence","Learning_Disabilities","Parental_Education_Level","Distance_from_Home","Gender"],"inputFeatures":["Hours_Studied","Attendance","Parental_Involvement","Access_to_Resources","Extracurricular_Activities","Sleep_Hours","Previous_Scores","Motivation_Level","Internet_Access","Tutoring_Sessions","Family_Income","Teacher_Quality","School_Type","Peer_Influence","Physical_Activity","Learning_Disabilities","Parental_Education_Level","Distance_from_Home","Gender"],"engineeredFeatures":["Support_Index","Study_Consistency"],"supportMap":{"Low":0,"Medium":1,"High":2},"fieldGroups":[["Academic",["Hours_Studied","Attendance","Previous_Scores","Tutoring_Sessions","Extracurricular_Activities"]],["Personal",["Sleep_Hours","Motivation_Level","Physical_Activity","Learning_Disabilities","Peer_Influence","Gender"]],["Family",["Parental_Involvement","Family_Income","Parental_Education_Level"]],["School and resources",["Access_to_Resources","Teacher_Quality","School_Type","Internet_Access","Distance_from_Home"]]],"labels":{"Hours_Studied":"Hours studied per week","Attendance":"Class attendance (%)","Parental_Involvement":"Parental involvement","Access_to_Resources":"Access to learning resources","Extracurricular_Activities":"Extracurricular activities","Sleep_Hours":"Sleep hours per night","Previous_Scores":"Previous exam scores","Motivation_Level":"Motivation level","Internet_Access":"Internet access","Tutoring_Sessions":"Tutoring sessions per month","Family_Income":"Family income","Teacher_Quality":"Teacher quality","School_Type":"School type","Peer_Influence":"Peer influence","Physical_Activity":"Physical activity (hours/week)","Learning_Disabilities":"Learning disabilities","Parental_Education_Level":"Parental education level","Distance_from_Home":"Distance from home to school","Gender":"Gender","Support_Index":"Overall support level (parents + resources + teacher)","Study_Consistency":"Study consistency (hours studied x attendance)"},"numericMedians":{"Hours_Studied":20.0,"Attendance":80.0,"Sleep_Hours":7.0,"Previous_Scores":75.0,"Tutoring_Sessions":1.0,"Physical_Activity":3.0,"Support_Index":3.0,"Study_Consistency":15.75},"categoricalModes":{"Parental_Involvement":"Medium","Access_to_Resources":"Medium","Extracurricular_Activities":"Yes","Motivation_Level":"Medium","Internet_Access":"Yes","Family_Income":"Low","Teacher_Quality":"Medium","School_Type":"Public","Peer_Influence":"Positive","Learning_Disabilities":"No","Parental_Education_Level":"High School","Distance_from_Home":"Near","Gender":"Male"},"scalerMean":{"Hours_Studied":19.975780510879847,"Attendance":79.88060548722801,"Sleep_Hours":7.053926206244087,"Previous_Scores":75.04522232734153,"Tutoring_Sessions":1.4976348155156103,"Physical_Activity":2.967644276253548,"Support_Index":3.3820245979186376,"Study_Consistency":15.949366130558182},"scalerScale":{"Hours_Studied":5.987102187429516,"Attendance":11.58142301067585,"Sleep_Hours":1.4682789744705746,"Previous_Scores":14.388317766448585,"Tutoring_Sessions":1.2351843220357146,"Physical_Activity":1.0339064599269998,"Support_Index":1.13177988245408,"Study_Consistency":5.3293631154196754},"categories":{"Parental_Involvement":["High","Low","Medium"],"Access_to_Resources":["High","Low","Medium"],"Extracurricular_Activities":["No","Yes"],"Motivation_Level":["High","Low","Medium"],"Internet_Access":["No","Yes"],"Family_Income":["High","Low","Medium"],"Teacher_Quality":["High","Low","Medium"],"School_Type":["Private","Public"],"Peer_Influence":["Negative","Neutral","Positive"],"Learning_Disabilities":["No","Yes"],"Parental_Education_Level":["College","High School","Postgraduate"],"Distance_from_Home":["Far","Moderate","Near"],"Gender":["Female","Male"]},"coef":[[3.8623491545413287,6.210794386521765,0.07500291594895478,2.1307565439838663,1.852063560403602,0.7184579355202595,0.9809094552268932,1.709487944524362,2.077467054448382,-2.3773735295871385,-0.1320672651702768,2.1474027831798317,-2.377848061962101,-0.2015284615267905,-1.0483683117809919,0.6163945714719644,1.5901834226846308,-1.810473315934353,-0.21168384705931917,-1.7677901422157833,1.3358164019067846,1.32829921352626,-1.7032664855469681,-0.05700646828833318,0.6209446921042983,-0.9975802355717267,-0.055338196841614,-0.22587021647638938,-0.20610352383264283,-1.7410794016091737,-0.15926345343535575,1.4683691147355042,1.1593075310061698,-1.5912812713152136,-0.22430039447055786,-1.6698148046487984,1.462141458810341,-1.6471055130795442,-0.1986550588338536,1.4137868316043465,-0.2578559790372975,-0.1741177612717385],[-5.828969262634924,-8.41800725898144,-0.1156725836796542,-2.6920931558538395,-2.3836653300837343,-0.9688550821774439,-0.7956869609498134,-1.168051430807984,-3.429265926938115,3.126101692393432,-0.03879243281007379,-3.375290085761,3.1728015909188256,-0.13946817251265528,0.9049961325679701,-1.2469527999227972,-2.226144068334119,1.9847649335591353,-0.10057753257986111,1.7735398731845615,-2.115496540539296,-2.0389920065799974,1.845692109972942,-0.1486567707477506,-1.4396198199824282,1.2274475119516728,-0.1297843593240478,-0.1814869682817444,-0.16046969907306788,1.8986433618941894,-0.12402884601424383,-2.11657118323477,-2.0018323695217988,1.6598757021669648,0.01601695494304252,1.7621561568137165,-2.1201297791115974,1.7955507676040505,-0.0525925298153452,-2.0849149051435147,-0.08103662132090847,-0.26092004603389835],[1.9666201080936876,2.207212872459788,0.0406696677306857,0.5613366118700353,0.5316017696801423,0.2503971466572073,-0.18522249427708315,-0.5414365137165051,1.3517988724897891,-0.7487281628062552,0.17085969798033118,1.2278873025811594,-0.7949535289567463,0.34099663403944086,0.1433721792130152,0.63055822845082,0.6359606456494536,-0.1742916176247926,0.31226137963917894,-0.005749730968748542,0.7796801386325938,0.7106927930537617,-0.1424256244259909,0.20566323903607378,0.8186751278781226,-0.22986727637993315,0.18512255616563597,0.40735718475813804,0.3665732229057083,-0.1575639602850101,0.2832922994496093,0.6482020684992431,0.842524838515591,-0.06859443085174463,0.20828343952751124,-0.09234135216490456,0.6579883203012257,-0.1484452545245164,0.25124758864919056,0.6711280735391519,0.3388926003581938,0.43503780730563246]],"intercept":[-0.4493691902908359,-0.3612199401033547,0.8105891303941024],"transformedNames":["numeric__Hours_Studied","numeric__Attendance","numeric__Sleep_Hours","numeric__Previous_Scores","numeric__Tutoring_Sessions","numeric__Physical_Activity","numeric__Support_Index","numeric__Study_Consistency","categorical__Parental_Involvement_High","categorical__Parental_Involvement_Low","categorical__Parental_Involvement_Medium","categorical__Access_to_Resources_High","categorical__Access_to_Resources_Low","categorical__Access_to_Resources_Medium","categorical__Extracurricular_Activities_No","categorical__Extracurricular_Activities_Yes","categorical__Motivation_Level_High","categorical__Motivation_Level_Low","categorical__Motivation_Level_Medium","categorical__Internet_Access_No","categorical__Internet_Access_Yes","categorical__Family_Income_High","categorical__Family_Income_Low","categorical__Family_Income_Medium","categorical__Teacher_Quality_High","categorical__Teacher_Quality_Low","categorical__Teacher_Quality_Medium","categorical__School_Type_Private","categorical__School_Type_Public","categorical__Peer_Influence_Negative","categorical__Peer_Influence_Neutral","categorical__Peer_Influence_Positive","categorical__Learning_Disabilities_No","categorical__Learning_Disabilities_Yes","categorical__Parental_Education_Level_College","categorical__Parental_Education_Level_High School","categorical__Parental_Education_Level_Postgraduate","categorical__Distance_from_Home_Far","categorical__Distance_from_Home_Moderate","categorical__Distance_from_Home_Near","categorical__Gender_Female","categorical__Gender_Male"],"columnOrigin":["Hours_Studied","Attendance","Sleep_Hours","Previous_Scores","Tutoring_Sessions","Physical_Activity","Support_Index","Study_Consistency","Parental_Involvement","Parental_Involvement","Parental_Involvement","Access_to_Resources","Access_to_Resources","Access_to_Resources","Extracurricular_Activities","Extracurricular_Activities","Motivation_Level","Motivation_Level","Motivation_Level","Internet_Access","Internet_Access","Family_Income","Family_Income","Family_Income","Teacher_Quality","Teacher_Quality","Teacher_Quality","School_Type","School_Type","Peer_Influence","Peer_Influence","Peer_Influence","Learning_Disabilities","Learning_Disabilities","Parental_Education_Level","Parental_Education_Level","Parental_Education_Level","Distance_from_Home","Distance_from_Home","Distance_from_Home","Gender","Gender"],"transformedMeans":[2.704028528472094e-16,-5.534309476584627e-16,-1.8902150947165862e-16,-1.0801829314328391e-16,-4.745914583222618e-16,-3.445157540937099e-17,-6.662598571241526e-16,1.9620592336800306e-16,0.2881740775780511,0.20132450331125828,0.5105014191106906,0.30066225165562915,0.19962157048249762,0.4997161778618732,0.4022705771050142,0.5977294228949858,0.20340586565752128,0.29176915799432357,0.5048249763481552,0.07871333964049196,0.921286660359508,0.19167455061494795,0.404162724692526,0.404162724692526,0.29668874172185433,0.09877010406811731,0.6045411542100284,0.30368968779564803,0.6963103122043519,0.2075685903500473,0.39280983916745504,0.39962157048249763,0.8966887417218543,0.10331125827814569,0.30236518448438976,0.5053926206244087,0.1922421948912015,0.10085146641438032,0.2980132450331126,0.6011352885525071,0.4249763481551561,0.5750236518448439],"numericRules":{"Hours_Studied":{"min":1.0,"max":44.0,"mean":19.975780510879847,"default":20.0,"step":1},"Attendance":{"min":60.0,"max":100.0,"mean":79.88060548722801,"default":80.0,"step":1},"Sleep_Hours":{"min":4.0,"max":10.0,"mean":7.053926206244087,"default":7.0,"step":1},"Previous_Scores":{"min":50.0,"max":100.0,"mean":75.04522232734153,"default":75.0,"step":1},"Tutoring_Sessions":{"min":0.0,"max":8.0,"mean":1.4976348155156103,"default":1.0,"step":1},"Physical_Activity":{"min":0.0,"max":6.0,"mean":2.967644276253548,"default":3.0,"step":1}},"categoryRules":{"Parental_Involvement":{"values":["High","Low","Medium"],"default":"Medium","share":{"High":0.2881740775780511,"Low":0.20132450331125828,"Medium":0.5105014191106906}},"Access_to_Resources":{"values":["High","Low","Medium"],"default":"Medium","share":{"High":0.30066225165562915,"Low":0.19962157048249762,"Medium":0.4997161778618732}},"Extracurricular_Activities":{"values":["No","Yes"],"default":"Yes","share":{"No":0.4022705771050142,"Yes":0.5977294228949858}},"Motivation_Level":{"values":["High","Low","Medium"],"default":"Medium","share":{"High":0.20340586565752128,"Low":0.29176915799432357,"Medium":0.5048249763481552}},"Internet_Access":{"values":["No","Yes"],"default":"Yes","share":{"No":0.07871333964049196,"Yes":0.921286660359508}},"Family_Income":{"values":["High","Low","Medium"],"default":"Low","share":{"High":0.19167455061494795,"Low":0.404162724692526,"Medium":0.404162724692526}},"Teacher_Quality":{"values":["High","Low","Medium"],"default":"Medium","share":{"High":0.29668874172185433,"Low":0.09877010406811731,"Medium":0.5929990539262062}},"School_Type":{"values":["Private","Public"],"default":"Public","share":{"Private":0.30368968779564803,"Public":0.6963103122043519}},"Peer_Influence":{"values":["Negative","Neutral","Positive"],"default":"Positive","share":{"Negative":0.2075685903500473,"Neutral":0.39280983916745504,"Positive":0.39962157048249763}},"Learning_Disabilities":{"values":["No","Yes"],"default":"No","share":{"No":0.8966887417218543,"Yes":0.10331125827814569}},"Parental_Education_Level":{"values":["College","High School","Postgraduate"],"default":"High School","share":{"College":0.30236518448438976,"High School":0.4910122989593188,"Postgraduate":0.1922421948912015}},"Distance_from_Home":{"values":["Far","Moderate","Near"],"default":"Near","share":{"Far":0.10085146641438032,"Moderate":0.2980132450331126,"Near":0.5924314096499527}},"Gender":{"values":["Female","Male"],"default":"Male","share":{"Female":0.4249763481551561,"Male":0.5750236518448439}}},"actionableNumeric":{"Hours_Studied":[2,5,8,12],"Attendance":[5,10,15,25],"Tutoring_Sessions":[1,2,3,4],"Sleep_Hours":[1,2]},"actionableOrdinal":{"Motivation_Level":["Low","Medium","High"],"Access_to_Resources":["Low","Medium","High"],"Parental_Involvement":["Low","Medium","High"],"Extracurricular_Activities":["No","Yes"]},"combinedPlan":[["Attendance","add",20],["Hours_Studied","add",12],["Tutoring_Sessions","add",3],["Motivation_Level","set","High"],["Access_to_Resources","set","High"],["Parental_Involvement","set","High"]],"metrics":{"accuracy":96.97428139183056,"balanced_accuracy":96.54051460774396,"macro_f1":96.82306823325617,"training_records":5285,"test_records":1322},"bestParameters":{"C":"100","solver":"lbfgs","class_weight":"None"}}</script>
+<script>
+
+// ===================================================================
+//  Logistic Regression, reproduced in the browser
+//  Every number below comes from the trained scikit-learn pipeline;
+//  this code only applies them in the same order.
+// ===================================================================
+
+const MODEL = JSON.parse(document.getElementById("model-data").textContent);
+
+// --- Step 1: derive the two engineered features from the raw answers ----------
+function addEngineeredFeatures(record) {
+    const full = Object.assign({}, record);
+    full["Support_Index"] =
+        MODEL.supportMap[record["Parental_Involvement"]] +
+        MODEL.supportMap[record["Access_to_Resources"]] +
+        MODEL.supportMap[record["Teacher_Quality"]];
+    full["Study_Consistency"] = record["Hours_Studied"] * record["Attendance"] / 100;
+    return full;
+}
+
+// --- Step 2: impute, scale, and one-hot encode, exactly as ColumnTransformer --
+function transform(record) {
+    const full = addEngineeredFeatures(record);
+    const vector = [];
+
+    for (const feature of MODEL.numericFeatures) {
+        let value = full[feature];
+        if (value === undefined || value === null || Number.isNaN(value)) {
+            value = MODEL.numericMedians[feature];       // SimpleImputer(median)
+        }
+        const mean = MODEL.scalerMean[feature];
+        const scale = MODEL.scalerScale[feature];
+        vector.push((value - mean) / scale);             // StandardScaler
+    }
+
+    for (const feature of MODEL.categoricalFeatures) {
+        let value = full[feature];
+        if (value === undefined || value === null || value === "") {
+            value = MODEL.categoricalModes[feature];     // SimpleImputer(most_frequent)
+        }
+        for (const category of MODEL.categories[feature]) {
+            vector.push(value === category ? 1 : 0);     // OneHotEncoder
+        }
+    }
+
+    return vector;
+}
+
+// --- Step 3: score each class and turn the scores into probabilities ----------
+function predict(record) {
+    const vector = transform(record);
+
+    const logits = MODEL.coef.map((weights, index) => {
+        let total = MODEL.intercept[index];
+        for (let j = 0; j < weights.length; j++) {
+            total += weights[j] * vector[j];
+        }
+        return total;
+    });
+
+    // Softmax, written the same way scikit-learn does it: subtract the largest
+    // value first so that Math.exp cannot overflow.
+    const largest = Math.max(...logits);
+    const exponentials = logits.map(value => Math.exp(value - largest));
+    const total = exponentials.reduce((sum, value) => sum + value, 0);
+    const probabilities = exponentials.map(value => value / total);
+
+    let bestIndex = 0;
+    for (let i = 1; i < probabilities.length; i++) {
+        if (probabilities[i] > probabilities[bestIndex]) bestIndex = i;
+    }
+
+    const byClass = {};
+    MODEL.classes.forEach((name, index) => { byClass[name] = probabilities[index]; });
+
+    return { predicted: MODEL.classes[bestIndex], probabilities: byClass, vector: vector };
+}
+
+// --- Step 4: explain the result ----------------------------------------------
+// The score that decides the winner is the predicted class's score minus the
+// average of the others, so those are the weights used here. Each contribution is
+// measured against the average student in the training data, which makes the
+// numbers add up to a meaningful total.
+function explain(record, predictedClass, vector) {
+    const predictedIndex = MODEL.classes.indexOf(predictedClass);
+    const otherIndices = MODEL.classes.map((_, i) => i).filter(i => i !== predictedIndex);
+
+    const grouped = {};
+    for (let j = 0; j < vector.length; j++) {
+        let otherAverage = 0;
+        for (const index of otherIndices) otherAverage += MODEL.coef[index][j];
+        otherAverage /= otherIndices.length;
+
+        const weight = MODEL.coef[predictedIndex][j] - otherAverage;
+        const centred = vector[j] - MODEL.transformedMeans[j];
+        const origin = MODEL.columnOrigin[j];
+
+        grouped[origin] = (grouped[origin] || 0) + weight * centred;
+    }
+
+    const full = addEngineeredFeatures(record);
+    const rows = Object.keys(grouped).map(feature => ({
+        feature: feature,
+        label: MODEL.labels[feature] || feature.replace(/_/g, " "),
+        value: describeValue(feature, full),
+        comparison: compareWithAverage(feature, full),
+        contribution: grouped[feature]
+    }));
+
+    rows.sort((a, b) => b.contribution - a.contribution);
+
+    const largest = Math.max(...rows.map(row => Math.abs(row.contribution)), 1e-9);
+    rows.forEach(row => { row.width = Math.min(100, Math.abs(row.contribution) / largest * 100); });
+
+    return {
+        supporting: rows.filter(row => row.contribution > 0.01).slice(0, 6),
+        opposing: rows.filter(row => row.contribution < -0.01)
+                      .sort((a, b) => a.contribution - b.contribution).slice(0, 6)
+    };
+}
+
+function describeValue(feature, full) {
+    const value = full[feature];
+    if (typeof value === "number") {
+        return Number.isInteger(value) ? String(value) : value.toFixed(1);
+    }
+    return String(value);
+}
+
+function compareWithAverage(feature, full) {
+    if (MODEL.numericRules[feature]) {
+        const average = MODEL.numericRules[feature].mean;
+        const difference = full[feature] - average;
+        if (Math.abs(difference) < 0.05 * Math.max(Math.abs(average), 1)) {
+            return "about average (" + average.toFixed(1) + ")";
+        }
+        return Math.abs(difference).toFixed(1) + (difference > 0 ? " above" : " below") +
+               " the average of " + average.toFixed(1);
+    }
+    if (MODEL.categoryRules[feature]) {
+        const share = MODEL.categoryRules[feature].share[full[feature]];
+        if (share === undefined) return "";
+        return Math.round(share * 100) + "% of students are in this group";
+    }
+    if (feature === "Support_Index") {
+        return "combines parental involvement, resources, and teacher quality";
+    }
+    if (feature === "Study_Consistency") {
+        return "combines hours studied with attendance";
+    }
+    return "";
+}
+
+// --- Step 5: what-if analysis -------------------------------------------------
+function runWhatIf(record, predictedClass) {
+    if (predictedClass === "High") return [];
+
+    const targetClass = predictedClass === "Medium" ? "High" : "Medium";
+    const baseProbability = predict(record).probabilities[targetClass];
+
+    const candidates = [];
+
+    for (const feature of Object.keys(MODEL.actionableNumeric)) {
+        const rules = MODEL.numericRules[feature];
+        for (const increment of MODEL.actionableNumeric[feature]) {
+            const newValue = Math.min(record[feature] + increment, rules.max);
+            if (newValue <= record[feature]) continue;
+            candidates.push({
+                key: feature,
+                description: "Raise " + MODEL.labels[feature].toLowerCase() +
+                             " from " + record[feature] + " to " + newValue,
+                record: Object.assign({}, record, { [feature]: newValue })
+            });
+        }
+    }
+
+    for (const feature of Object.keys(MODEL.actionableOrdinal)) {
+        const ladder = MODEL.actionableOrdinal[feature];
+        const position = ladder.indexOf(record[feature]);
+        if (position < 0) continue;
+        for (const higher of ladder.slice(position + 1)) {
+            candidates.push({
+                key: feature,
+                description: "Improve " + MODEL.labels[feature].toLowerCase() +
+                             " from " + record[feature] + " to " + higher,
+                record: Object.assign({}, record, { [feature]: higher })
+            });
+        }
+    }
+
+    const results = [];
+    for (const candidate of candidates) {
+        const outcome = predict(candidate.record);
+        const gain = outcome.probabilities[targetClass] - baseProbability;
+        if (gain <= 0.005) continue;
+        results.push({
+            key: candidate.key,
+            description: candidate.description,
+            gain: gain * 100,
+            targetClass: targetClass,
+            changesClass: MODEL.classRank[outcome.predicted] > MODEL.classRank[predictedClass],
+            newClass: outcome.predicted
+        });
+    }
+
+    results.sort((a, b) => b.gain - a.gain);
+
+    const seen = new Set();
+    const trimmed = [];
+    for (const result of results) {
+        if (seen.has(result.key)) continue;
+        seen.add(result.key);
+        trimmed.push(result);
+        if (trimmed.length === 4) break;
+    }
+
+    if (trimmed.length > 0) return trimmed;
+
+    // Nothing worked on its own, so apply the improvements together.
+    let current = Object.assign({}, record);
+    const steps = [];
+    let last = null;
+
+    for (const [feature, mode, amount] of MODEL.combinedPlan) {
+        const oldValue = current[feature];
+        let newValue;
+
+        if (mode === "add") {
+            newValue = Math.min(oldValue + amount, MODEL.numericRules[feature].max);
+        } else {
+            const ladder = MODEL.actionableOrdinal[feature] || [];
+            if (ladder.indexOf(oldValue) < 0 ||
+                ladder.indexOf(oldValue) >= ladder.indexOf(amount)) continue;
+            newValue = amount;
+        }
+        if (newValue === oldValue) continue;
+
+        steps.push(MODEL.labels[feature] + ": " + oldValue + " to " + newValue);
+        current = Object.assign({}, current, { [feature]: newValue });
+
+        const outcome = predict(current);
+        const gain = outcome.probabilities[targetClass] - baseProbability;
+        const flipped = MODEL.classRank[outcome.predicted] > MODEL.classRank[predictedClass];
+        last = { outcome: outcome, gain: gain, flipped: flipped, steps: steps.slice() };
+
+        if (flipped || gain > 0.01) {
+            return [{
+                description: "No single change is enough on its own. These changes made " +
+                             "together would move the prediction:",
+                steps: last.steps,
+                gain: gain * 100,
+                targetClass: targetClass,
+                changesClass: flipped,
+                newClass: outcome.predicted
+            }];
+        }
+    }
+
+    if (!last) return [];
+
+    return [{
+        description: "Even applying every realistic improvement together does not change " +
+                     "the predicted class for this student:",
+        steps: last.steps,
+        gain: last.gain * 100,
+        targetClass: targetClass,
+        changesClass: false,
+        newClass: last.outcome.predicted
+    }];
+}
+
+// --- Step 6: validation, the same rules the Flask version applies -------------
+function validate(form) {
+    const record = {};
+    const errors = {};
+
+    for (const feature of MODEL.inputFeatures) {
+        const field = form.elements[feature];
+        const raw = field ? String(field.value).trim() : "";
+
+        if (raw === "") {
+            errors[feature] = "This field is required.";
+            continue;
+        }
+
+        if (MODEL.numericRules[feature]) {
+            const rules = MODEL.numericRules[feature];
+            const number = Number(raw);
+            if (!Number.isFinite(number)) {
+                errors[feature] = "Please enter a number.";
+                continue;
+            }
+            if (number < rules.min || number > rules.max) {
+                errors[feature] = "Please enter a value between " + rules.min + " and " +
+                    rules.max + ". This is the range covered by the training data, so the " +
+                    "model cannot make a reliable prediction outside it.";
+                continue;
+            }
+            record[feature] = number;
+        } else {
+            const allowed = MODEL.categoryRules[feature].values;
+            if (!allowed.includes(raw)) {
+                errors[feature] = "Please choose one of: " + allowed.join(", ") + ".";
+                continue;
+            }
+            record[feature] = raw;
+        }
+    }
+
+    return { record: record, errors: errors };
+}
+
+// --- Page rendering ----------------------------------------------------------
+function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[character]));
+}
+
+function buildForm() {
+    const container = document.getElementById("form-fields");
+    let html = "";
+
+    for (const [groupName, groupFields] of MODEL.fieldGroups) {
+        html += '<fieldset><legend>' + escapeHtml(groupName) + '</legend><div class="grid">';
+
+        for (const feature of groupFields) {
+            const label = MODEL.labels[feature] || feature;
+            html += '<div class="field" data-field="' + feature + '">';
+            html += '<label for="' + feature + '">' + escapeHtml(label) + '</label>';
+
+            if (MODEL.numericRules[feature]) {
+                const rules = MODEL.numericRules[feature];
+                html += '<input type="number" id="' + feature + '" name="' + feature +
+                        '" value="' + rules.default + '" min="' + rules.min +
+                        '" max="' + rules.max + '" step="' + rules.step + '">';
+                html += '<span class="hint">Allowed range ' + rules.min + ' to ' + rules.max +
+                        ' &middot; average ' + rules.mean.toFixed(1) + '</span>';
+            } else {
+                const rules = MODEL.categoryRules[feature];
+                html += '<select id="' + feature + '" name="' + feature + '">';
+                for (const option of rules.values) {
+                    html += '<option value="' + escapeHtml(option) + '"' +
+                            (option === rules.default ? " selected" : "") + '>' +
+                            escapeHtml(option) + '</option>';
+                }
+                html += '</select>';
+                html += '<span class="hint">' + rules.values.length + ' options</span>';
+            }
+
+            html += '<span class="error"></span></div>';
+        }
+        html += '</div></fieldset>';
+    }
+
+    container.innerHTML = html;
+}
+
+function showErrors(errors) {
+    document.querySelectorAll(".field").forEach(field => {
+        const feature = field.getAttribute("data-field");
+        const message = errors[feature];
+        field.classList.toggle("has-error", Boolean(message));
+        field.querySelector(".error").textContent = message || "";
+    });
+
+    const notice = document.getElementById("notice");
+    const count = Object.keys(errors).length;
+    if (count > 0) {
+        notice.textContent = "Please correct the highlighted fields and submit again.";
+        notice.style.display = "block";
+        const first = document.querySelector(".field.has-error");
+        if (first) first.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+        notice.style.display = "none";
+    }
+}
+
+function factorTable(rows, kind) {
+    if (rows.length === 0) {
+        return '<p class="lead">' + (kind === "positive"
+            ? "No single factor stood out; the result came from many small effects."
+            : "Nothing worked strongly against this result.") + '</p>';
+    }
+
+    let html = '<table class="factors"><tr><th>Factor</th><th>Strength</th><th></th></tr>';
+    for (const row of rows) {
+        html += '<tr><td><div class="factor-name">' + escapeHtml(row.label) + '</div>' +
+                '<div class="factor-value">' + escapeHtml(row.value) +
+                (row.comparison ? " &mdash; " + escapeHtml(row.comparison) : "") +
+                '</div></td>' +
+                '<td class="bar-cell"><div class="bar ' + kind +
+                '" style="width: ' + row.width.toFixed(4) + '%"></div></td>' +
+                '<td class="amount">' + (row.contribution > 0 ? "+" : "") +
+                row.contribution.toFixed(2) + '</td></tr>';
+    }
+    return html + '</table>';
+}
+
+function renderResult(record, outcome, explanation, suggestions) {
+    const ordered = MODEL.displayOrder.map(label => ({
+        label: label,
+        value: outcome.probabilities[label] * 100
+    }));
+    const sorted = ordered.slice().sort((a, b) => b.value - a.value);
+    const confidence = sorted[0].value;
+    const runnerUp = sorted[1];
+    const predicted = outcome.predicted;
+
+    const meaning = predicted === "Low"
+        ? "A Low prediction means the model expects an exam score below 65, which is the group an early-intervention system would flag for extra support."
+        : predicted === "Medium"
+            ? "A Medium prediction means the model expects an exam score between 65 and 69."
+            : "A High prediction means the model expects an exam score of 70 or above.";
+
+    let html = '<div class="card"><h2>Prediction result</h2>';
+    html += '<div class="verdict ' + predicted + '"><div>' +
+            '<div class="class-name">' + predicted + '</div>' +
+            '<div style="font-size:13px;color:var(--muted)">predicted performance</div></div>' +
+            '<div class="detail">The model is <strong>' + confidence.toFixed(1) +
+            '%</strong> confident in this class. The next most likely class is <strong>' +
+            runnerUp.label + '</strong> at ' + runnerUp.value.toFixed(1) + '%. ' +
+            meaning + '</div></div>';
+
+    html += '<div class="probability">';
+    for (const item of ordered) {
+        html += '<div class="row"><span class="name">' + item.label + '</span>' +
+                '<span class="track"><span class="fill ' + item.label +
+                '" style="width: ' + item.value.toFixed(4) + '%"></span></span>' +
+                '<span class="value">' + item.value.toFixed(1) + '%</span></div>';
+    }
+    html += '</div></div>';
+
+    const full = addEngineeredFeatures(record);
+    html += '<div class="card"><h2>Why did you get this result?</h2>' +
+            '<p class="lead">Logistic Regression decides by adding up one weighted ' +
+            'contribution per factor, so the result can be broken down exactly. Each number ' +
+            'below shows how much that factor pushed the prediction towards <strong>' +
+            predicted + '</strong> compared with an average student in the training data. ' +
+            'A longer green bar means the factor helped more; a red bar means the factor ' +
+            'pushed away from this class.</p>';
+
+    html += '<div class="split"><div><h3>Factors that led to ' + predicted +
+            '<span class="tag positive">pushed towards</span></h3>' +
+            factorTable(explanation.supporting, "positive") + '</div>';
+    html += '<div><h3>Factors that worked against it' +
+            '<span class="tag negative">pushed away</span></h3>' +
+            factorTable(explanation.opposing, "negative") + '</div></div>';
+
+    html += '<div class="disclaimer"><strong>Calculated from your answers:</strong> ' +
+            'Support Index = ' + full["Support_Index"] + ' out of 6 &middot; ' +
+            'Study Consistency = ' + full["Study_Consistency"].toFixed(1) + '. ' +
+            'These two engineered features are not entered directly &mdash; they are derived ' +
+            'from the answers you gave, which is why they can appear in the table above.' +
+            '</div></div>';
+
+    if (suggestions.length > 0) {
+        html += '<div class="card"><h2>What would change the result?</h2>' +
+                '<p class="lead">Each change below was re-run through the model one at a ' +
+                'time, keeping everything else the same, to see how much it would raise the ' +
+                'chance of reaching <strong>' + suggestions[0].targetClass + '</strong>.</p>';
+
+        for (const item of suggestions) {
+            html += '<div class="suggestion' + (item.changesClass ? " flip" : "") + '">' +
+                    escapeHtml(item.description);
+            if (item.steps) {
+                html += '<ul class="steps">';
+                for (const step of item.steps) html += '<li>' + escapeHtml(step) + '</li>';
+                html += '</ul>';
+            }
+            html += '<span class="gain">';
+            if (item.gain > 0) {
+                html += 'Chance of ' + item.targetClass + ' increases by ' +
+                        item.gain.toFixed(1) + ' percentage points' +
+                        (item.changesClass ? ', which is enough to change the prediction to <strong>' +
+                        item.newClass + '</strong>' : '') + '.';
+            } else {
+                html += 'The predicted class stays at <strong>' + item.newClass +
+                        '</strong>, which means this student\'s result is driven by factors ' +
+                        'the model sees as difficult to move.';
+            }
+            html += '</span></div>';
+        }
+
+        html += '<div class="disclaimer">These are model estimates based on patterns in the ' +
+                'training data, not guaranteed outcomes, and they show correlation rather ' +
+                'than proven cause and effect.</div></div>';
+    }
+
+    html += '<div class="card"><h2>Your answers</h2><details>' +
+            '<summary>Show the 19 values used for this prediction</summary>' +
+            '<table class="answers">';
+    for (const feature of MODEL.inputFeatures) {
+        html += '<tr><td>' + escapeHtml(MODEL.labels[feature] || feature) + '</td><td>' +
+                escapeHtml(record[feature]) + '</td></tr>';
+    }
+    html += '</table></details>' +
+            '<div class="actions"><button class="button" type="button" id="again">' +
+            'Make another prediction</button></div>' +
+            '<div class="disclaimer">This is a coursework prototype trained on a public ' +
+            'Kaggle dataset. It should not be used to make real decisions about a student.' +
+            '</div></div>';
+
+    const results = document.getElementById("results");
+    results.innerHTML = html;
+    results.style.display = "block";
+
+    document.getElementById("again").addEventListener("click", () => {
+        results.style.display = "none";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    results.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// --- Wiring ------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+    buildForm();
+
+    document.getElementById("predict-form").addEventListener("submit", event => {
+        event.preventDefault();
+
+        const { record, errors } = validate(event.target);
+        showErrors(errors);
+        if (Object.keys(errors).length > 0) {
+            document.getElementById("results").style.display = "none";
+            return;
+        }
+
+        const outcome = predict(record);
+        const explanation = explain(record, outcome.predicted, outcome.vector);
+        const suggestions = runWhatIf(record, outcome.predicted);
+
+        renderResult(record, outcome, explanation, suggestions);
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+        buildForm();
+        document.getElementById("results").style.display = "none";
+        document.getElementById("notice").style.display = "none";
+    });
+});
+
+</script>
+</body>
+</html>
