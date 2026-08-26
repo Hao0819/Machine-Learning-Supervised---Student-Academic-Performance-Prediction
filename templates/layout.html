@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Student Performance Prediction{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="masthead">
+    <div class="page">
+        <h1>Student Academic Performance Prediction</h1>
+        <p>BMCS2203 Artificial Intelligence &middot; Multiclass Logistic Regression</p>
+        <div class="badges">
+            <span class="badge">Best model: Logistic Regression (C={{ best_parameters['C'] }}, solver={{ best_parameters['solver'] }})</span>
+            <span class="badge">Test accuracy {{ '%.2f'|format(metrics.accuracy) }}%</span>
+            <span class="badge">Macro F1 {{ '%.2f'|format(metrics.macro_f1) }}%</span>
+            <span class="badge">{{ metrics.test_records }} held-out students</span>
+        </div>
+    </div>
+</header>
+
+<main class="page">
+    {% block content %}{% endblock %}
+
+    <p class="footer">
+        Trained on {{ metrics.training_records }} students from
+        <code>StudentPerformanceFactors.csv</code>. The model, preprocessing pipeline, and
+        hyperparameters are the ones selected in <code>LogisticRegression.ipynb</code>.
+    </p>
+</main>
+
+</body>
+</html>
