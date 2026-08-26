@@ -1,0 +1,488 @@
+/* Student Academic Performance Prediction - interface styles */
+
+:root {
+    --page: #f4f6fa;
+    --card: #ffffff;
+    --ink: #1c2536;
+    --muted: #5d6b82;
+    --line: #dde3ed;
+    --brand: #2f5d8c;
+    --brand-dark: #234869;
+    --good: #2f855a;
+    --good-soft: #d6f0e2;
+    --warn: #b7791f;
+    --bad: #b03a3a;
+    --bad-soft: #fadfdf;
+    --low: #d97706;
+    --medium: #2f6fb0;
+    --high: #2f855a;
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0 0 60px;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+}
+
+.page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ---------- header ---------- */
+
+.masthead {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+    color: #ffffff;
+    padding: 28px 0 24px;
+    margin-bottom: 26px;
+}
+
+.masthead h1 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    letter-spacing: 0.2px;
+}
+
+.masthead p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.badges {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12.5px;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 22px;
+}
+
+.card h2 {
+    margin: 0 0 4px;
+    font-size: 19px;
+}
+
+.card h3 {
+    margin: 22px 0 10px;
+    font-size: 16px;
+}
+
+.card .lead {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.notice {
+    background: #fff8e6;
+    border: 1px solid #f0dca8;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* ---------- form ---------- */
+
+fieldset {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 0 0 8px;
+    padding: 18px 0 4px;
+}
+
+fieldset:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--brand);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.field label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--ink);
+}
+
+.field input:focus,
+.field select:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+    border-color: var(--brand);
+}
+
+.field .hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.field.has-error input,
+.field.has-error select {
+    border-color: var(--bad);
+    background: #fff7f7;
+}
+
+.field .error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--bad);
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.button {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    border: 1px solid var(--brand);
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button:hover {
+    background: var(--brand-dark);
+}
+
+.button.secondary {
+    background: #fff;
+    color: var(--brand);
+}
+
+.button.secondary:hover {
+    background: #eef3f9;
+}
+
+/* ---------- result ---------- */
+
+.verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    margin-bottom: 20px;
+}
+
+.verdict.Low {
+    background: #fff5e8;
+    border-color: #f2d0a4;
+}
+
+.verdict.Medium {
+    background: #eef4fb;
+    border-color: #bdd4ec;
+}
+
+.verdict.High {
+    background: #eaf7f0;
+    border-color: #b3e0c8;
+}
+
+.verdict .class-name {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.verdict.Low .class-name { color: var(--low); }
+.verdict.Medium .class-name { color: var(--medium); }
+.verdict.High .class-name { color: var(--high); }
+
+.verdict .detail {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 620px;
+}
+
+.probability {
+    margin-bottom: 12px;
+}
+
+.probability .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.probability .name {
+    width: 74px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.probability .track {
+    display: block;
+    flex: 1;
+    background: #eceff5;
+    border-radius: 999px;
+    height: 15px;
+    overflow: hidden;
+}
+
+/* display:block is required: a span is inline by default, and an inline element
+   ignores width and height, so the coloured bar would never be drawn. */
+.probability .fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.probability .fill.Low { background: var(--low); }
+.probability .fill.Medium { background: var(--medium); }
+.probability .fill.High { background: var(--high); }
+
+.probability .value {
+    width: 62px;
+    text-align: right;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- explanation ---------- */
+
+.factors {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.factors th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding: 0 10px 7px 0;
+}
+
+.factors td {
+    padding: 9px 10px 9px 0;
+    border-bottom: 1px solid #eef1f6;
+    vertical-align: middle;
+}
+
+.factors .factor-name {
+    font-weight: 600;
+}
+
+.factors .factor-value {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.factors .bar-cell {
+    width: 180px;
+}
+
+.factors .bar {
+    height: 11px;
+    border-radius: 999px;
+    min-width: 3px;
+}
+
+.factors .bar.positive { background: var(--good); }
+.factors .bar.negative { background: var(--bad); }
+
+.factors .amount {
+    width: 66px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 26px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.tag.positive {
+    background: var(--good-soft);
+    color: var(--good);
+}
+
+.tag.negative {
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+/* ---------- suggestions ---------- */
+
+.suggestion {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--brand);
+    border-radius: 7px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.suggestion.flip {
+    border-left-color: var(--good);
+    background: #f4fbf7;
+}
+
+.suggestion .gain {
+    color: var(--muted);
+    font-size: 13px;
+    display: block;
+    margin-top: 3px;
+}
+
+/* ---------- answers ---------- */
+
+details {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 12px 15px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.answers {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 12px;
+}
+
+.answers td {
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid #eef1f6;
+}
+
+.answers td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+    padding-top: 4px;
+}
+
+.footer code {
+    background: #e8ecf3;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.disclaimer {
+    background: #f0f3f8;
+    border-radius: 7px;
+    padding: 12px 15px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+    .verdict .class-name { font-size: 28px; }
+    .factors .bar-cell { width: 90px; }
+}
+
+.suggestion .steps {
+    margin: 8px 0 4px;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: var(--ink);
+}
+
+.suggestion .steps li {
+    margin-bottom: 3px;
+}

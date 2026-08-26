@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Enter student details{% endblock %}
+
+{% block content %}
+
+{% if message %}
+<div class="notice">{{ message }}</div>
+{% endif %}
+
+<form class="card" method="post" action="{{ url_for('predict') }}" novalidate>
+    <h2>Enter the student details</h2>
+    <p class="lead">
+        Fill in the 19 factors below and the model will predict whether this student's
+        academic performance is Low, Medium, or High, and explain which factors led to
+        that result. Every field is required, and numeric values must stay inside the
+        range covered by the training data.
+    </p>
+
+    {% for group_name, group_fields in field_groups %}
+    <fieldset>
+        <legend>{{ group_name }}</legend>
+        <div class="grid">
+            {% for name in group_fields %}
+            <div class="field {% if errors.get(name) %}has-error{% endif %}">
+                <label for="{{ name }}">{{ labels.get(name, name) }}</label>
+
+                {% if name in numeric_rules %}
+                    {% set rules = numeric_rules[name] %}
+                    <input type="number"
+                           id="{{ name }}"
+                           name="{{ name }}"
+                           value="{{ values.get(name, '') }}"
+                           min="{{ rules['min'] }}"
+                           max="{{ rules['max'] }}"
+                           step="{{ rules['step'] }}">
+                    <span class="hint">
+                        Allowed range {{ '%g'|format(rules['min']) }} to {{ '%g'|format(rules['max']) }}
+                        &middot; average {{ '%.1f'|format(rules['mean']) }}
+                    </span>
+                {% else %}
+                    {% set rules = category_rules[name] %}
+                    <select id="{{ name }}" name="{{ name }}">
+                        {% for option in rules['values'] %}
+                        <option value="{{ option }}"
+                                {% if values.get(name) == option %}selected{% endif %}>
+                            {{ option }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <span class="hint">{{ rules['values']|length }} options</span>
+                {% endif %}
+
+                {% if errors.get(name) %}
+                <span class="error">{{ errors[name] }}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </fieldset>
+    {% endfor %}
+
+    <div class="actions">
+        <button class="button" type="submit">Predict performance</button>
+        <a class="button secondary" href="{{ url_for('example') }}">Load an example student</a>
+        <a class="button secondary" href="{{ url_for('index') }}">Reset the form</a>
+    </div>
+</form>
+
+<div class="card">
+    <h2>How the prediction is made</h2>
+    <p class="lead" style="margin-bottom:0">
+        Your answers are passed through the same pipeline used to train the model: missing
+        values are imputed, categorical answers are one-hot encoded, and numeric values are
+        standardized. Two extra features are then calculated from your answers &mdash;
+        <strong>Support Index</strong> (parental involvement + access to resources + teacher
+        quality) and <strong>Study Consistency</strong> (hours studied &times; attendance).
+        Logistic Regression scores each of the three classes and the highest score wins, so
+        the result can be traced back to the exact contribution of each factor.
+    </p>
+</div>
+
+{% endblock %}
