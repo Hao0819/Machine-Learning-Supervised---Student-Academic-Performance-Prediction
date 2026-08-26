@@ -261,7 +261,6 @@ def build_model():
         "transformed_means": transformed_means,
         "column_origin": column_origin,
         "metrics": metrics,
-        "example_student": X_test.iloc[0][input_features].to_dict(),
     }
 
 
@@ -636,20 +635,6 @@ def render_form(values, errors=None, message=None):
 @app.route("/", methods=["GET"])
 def index():
     return render_form(form_defaults())
-
-
-@app.route("/example", methods=["GET"])
-def example():
-    values = {
-        key: (f"{value:g}" if isinstance(value, (int, float, np.integer, np.floating))
-              else str(value))
-        for key, value in BUNDLE["example_student"].items()
-    }
-    return render_form(
-        values,
-        message="Loaded a real student record from the held-out test data. "
-                "Press Predict to see the result.",
-    )
 
 
 @app.route("/predict", methods=["POST"])
