@@ -21,9 +21,20 @@ Run with:
 then open http://127.0.0.1:5000 in a browser.
 """
 
+import socket
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from flask import Flask, render_template, request
+
+try:
+    from flask import Flask, render_template, request
+except ImportError:  # pragma: no cover - only reached on a machine without Flask
+    raise SystemExit(
+        "Flask is not installed.\n"
+        "Install the requirements first:\n\n"
+        "    pip install -r requirements.txt\n"
+    )
 
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -38,7 +49,12 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 # Configuration
 # ----------------------------------------------------------------------------------
 
-DATA_FILE = "StudentPerformanceFactors.csv"
+# Resolved against this file's own folder, so the app runs from any working directory.
+PROJECT_FOLDER = Path(__file__).resolve().parent
+DATA_FILE = PROJECT_FOLDER / "StudentPerformanceFactors.csv"
+
+HOST = "127.0.0.1"
+PREFERRED_PORT = 5000
 
 # Best hyperparameters selected by GridSearchCV in LogisticRegression.ipynb (Section 5).
 BEST_PARAMETERS = {"C": 100, "solver": "lbfgs", "class_weight": None}
@@ -144,8 +160,9 @@ def build_model():
     try:
         data = pd.read_csv(DATA_FILE)
     except FileNotFoundError:
-        raise FileNotFoundError(
-            f"'{DATA_FILE}' was not found. Keep the CSV file in the same folder as app.py."
+        raise SystemExit(
+            f"\n'{DATA_FILE.name}' was not found in {DATA_FILE.parent}.\n"
+            "Keep the CSV file in the same folder as app.py and try again.\n"
         )
 
     if data.empty:
@@ -703,8 +720,29 @@ def not_found(error):  # noqa: ARG001
     return render_form(form_defaults(), message="That page does not exist."), 404
 
 
+def find_available_port(host, preferred, attempts=10):
+    """Return the first free port, so the app still starts if 5000 is already taken."""
+    for port in range(preferred, preferred + attempts):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as probe:
+            try:
+                probe.bind((host, port))
+                return port
+            except OSError:
+                continue
+    raise SystemExit(
+        f"Ports {preferred} to {preferred + attempts - 1} are all in use. "
+        "Close the other program and try again."
+    )
+
+
 if __name__ == "__main__":
+    port = find_available_port(HOST, PREFERRED_PORT)
+
     print()
-    print("Open http://127.0.0.1:5000 in your browser. Press CTRL+C to stop.")
+    print("=" * 62)
+    print(f"  Open this address in your browser:  http://{HOST}:{port}")
+    print("  Keep this window open. Press CTRL+C here to stop the server.")
+    print("=" * 62)
     print()
-    app.run(host="127.0.0.1", port=5000, debug=False)
+
+    app.run(host=HOST, port=port, debug=False)
