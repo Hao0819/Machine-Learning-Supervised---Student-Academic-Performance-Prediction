@@ -119,12 +119,14 @@ The held-out test set is used for final evaluation, not for fitting preprocessin
 
 ### Feature engineering
 
-The Decision Tree notebook derives two additional features from existing columns:
+Both the Decision Tree and the KNN notebooks derive the same two additional features from existing columns:
 
 - `Support_Index` sums the ordinal codes of `Parental_Involvement`, `Access_to_Resources`, and `Teacher_Quality`.
 - `Study_Consistency` multiplies `Hours_Studied` by `Attendance` and divides by 100.
 
-Both are computed row by row, so no information crosses between records and the train/test split remains valid.
+Both are computed row by row, so no information crosses between records and the train/test split remains valid. The same definitions are used in both notebooks, so the feature set stays consistent across models.
+
+The effect was measured, not assumed. Adding the two features on an identical split and search grid raised Decision Tree accuracy from 74.81% to 77.31% and KNN accuracy from 82.30% to 84.80%. For KNN the gain comes with a trade-off: overall accuracy and macro F1 improve, but Low-class recall falls from 67.01% to 61.17% because the extra separation makes the model commit harder to the majority Medium class.
 
 ## Model implementations
 
@@ -165,8 +167,8 @@ The KNN Pipeline also uses `SelectKBest(f_classif)` to remove weaker transformed
 Best parameters in the current run:
 
 ```text
-selected transformed features = 12
-n_neighbors = 15
+selected transformed features = 20
+n_neighbors = 31
 weights = distance
 p = 2 (Euclidean distance)
 ```
@@ -211,10 +213,12 @@ All values below come from the saved outputs in the current notebooks.
 | Model | Test accuracy | Balanced accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |
 |---|---:|---:|---:|---:|---:|---:|
 | Decision Tree | 77.31% | 75.76% | 76.72% | 75.76% | 76.20% | 77.22% |
-| KNN | 82.30% | 77.89% | 85.28% | 77.89% | 80.68% | 81.99% |
+| KNN | 84.80% | 79.19% | 89.92% | 79.19% | 82.75% | 84.27% |
 | Logistic Regression | **96.82%** | **96.45%** | **96.91%** | **96.45%** | **96.68%** | **96.82%** |
 
-Logistic Regression currently produces the strongest overall performance on this dataset. KNN exceeds 80% test accuracy after feature selection. Decision Tree provides more interpretable decision rules but has lower predictive performance in the current experiment.
+Logistic Regression currently produces the strongest overall performance on this dataset. KNN reaches 84.80% test accuracy after feature engineering and feature selection. Decision Tree provides more interpretable decision rules but has lower predictive performance in the current experiment.
+
+All three models are trained and evaluated on the identical split (`test_size=0.20`, `random_state=42`, `stratify=y`) and the identical `StratifiedKFold(5, shuffle=True, random_state=42)` cross-validation, so the table compares like with like.
 
 ### Confusion matrices
 
@@ -232,9 +236,9 @@ Rows are actual classes and columns are predicted classes.
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 195 | 96 | 0 |
-| Medium | 20 | 651 | 35 |
-| High | 2 | 81 | 242 |
+| Low | 178 | 113 | 0 |
+| Medium | 5 | 685 | 16 |
+| High | 2 | 65 | 258 |
 
 #### Logistic Regression
 
