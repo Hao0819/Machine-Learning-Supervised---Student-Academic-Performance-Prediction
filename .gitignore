@@ -17,3 +17,6 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# Personal study notes, not part of the submission
+KNN_guide.html
