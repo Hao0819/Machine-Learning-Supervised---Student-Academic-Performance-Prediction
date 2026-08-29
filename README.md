@@ -126,7 +126,7 @@ Both the Decision Tree and the KNN notebooks derive the same two additional feat
 
 Both are computed row by row, so no information crosses between records and the train/test split remains valid. The same definitions are used in both notebooks, so the feature set stays consistent across models.
 
-The effect was measured, not assumed. Adding the two features on an identical split and search grid raised Decision Tree accuracy from 74.81% to 77.31% and KNN accuracy from 82.30% to 84.80%. For KNN the gain comes with a trade-off: overall accuracy and macro F1 improve, but Low-class recall falls from 67.01% to 61.17% because the extra separation makes the model commit harder to the majority Medium class.
+The effect was measured, not assumed. Adding the two features on an identical split and search space raised Decision Tree accuracy from 76.32% to 78.06% and KNN accuracy from 82.30% to 84.80%. For KNN the gain comes with a trade-off: overall accuracy and macro F1 improve, but Low-class recall falls from 67.01% to 61.17% because the extra separation makes the model commit harder to the majority Medium class.
 
 ## Model implementations
 
@@ -140,18 +140,19 @@ The Decision Tree learns hierarchical decision rules from student features. `Gri
 - Minimum samples required in a leaf
 - Cost-complexity pruning parameter `ccp_alpha`
 
+`GridSearchCV` also uses a data-driven set of `ccp_alpha` candidates: `cost_complexity_pruning_path` is run on the training data first, and candidates are drawn from the actual pruning points that path finds, instead of guessing fixed values. The resulting search covers 1,728 candidates (8,640 fits).
+
 Best parameters in the current run:
 
 ```text
 criterion = gini
-max_depth = None
-min_samples_leaf = 5
-min_samples_split = 2
-ccp_alpha = 0.0005
+max_depth = 10
+min_samples_leaf = 1
+min_samples_split = 5
+ccp_alpha = 0.000578
 ```
 
-Instead of limiting the depth in advance, the selected model grows the tree fully and then
-prunes it with `ccp_alpha`, which produced a higher cross-validated macro F1 (0.7699).
+The selected model reaches 77.98% cross-validated accuracy (macro F1 77.06%). A pruning curve (training vs. cross-validation accuracy across `ccp_alpha`) is included in the notebook to show the bias-variance trade-off directly.
 
 ### K-Nearest Neighbors
 
@@ -212,11 +213,11 @@ All values below come from the saved outputs in the current notebooks.
 
 | Model | Test accuracy | Balanced accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |
 |---|---:|---:|---:|---:|---:|---:|
-| Decision Tree | 77.31% | 75.76% | 76.72% | 75.76% | 76.20% | 77.22% |
+| Decision Tree | 78.06% | 76.50% | 77.57% | 76.50% | 77.00% | 77.99% |
 | KNN | 84.80% | 79.19% | 89.92% | 79.19% | 82.75% | 84.27% |
-| Logistic Regression | **96.82%** | **96.45%** | **96.91%** | **96.45%** | **96.68%** | **96.82%** |
+| Logistic Regression | **96.97%** | **96.54%** | **97.12%** | **96.54%** | **96.82%** | **96.97%** |
 
-Logistic Regression currently produces the strongest overall performance on this dataset. KNN reaches 84.80% test accuracy after feature engineering and feature selection. Decision Tree provides more interpretable decision rules but has lower predictive performance in the current experiment.
+Logistic Regression currently produces the strongest overall performance on this dataset (96.97%), followed by KNN (84.80%), with Decision Tree behind both (78.06%). This ranking is consistent with the target being derived from a roughly linear combination of the numeric predictors: Logistic Regression fits that boundary directly, while Decision Tree can only approximate it with axis-aligned threshold splits. Decision Tree still has the smallest class-distribution distortion of the three models and the most directly interpretable predictions.
 
 All three models are trained and evaluated on the identical split (`test_size=0.20`, `random_state=42`, `stratify=y`) and the identical `StratifiedKFold(5, shuffle=True, random_state=42)` cross-validation, so the table compares like with like.
 
@@ -228,8 +229,8 @@ Rows are actual classes and columns are predicted classes.
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 194 | 97 | 0 |
-| Medium | 74 | 567 | 65 |
+| Low | 198 | 93 | 0 |
+| Medium | 72 | 573 | 61 |
 | High | 1 | 63 | 261 |
 
 #### KNN
@@ -245,7 +246,7 @@ Rows are actual classes and columns are predicted classes.
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
 | Low | 280 | 11 | 0 |
-| Medium | 6 | 690 | 10 |
+| Medium | 6 | 692 | 8 |
 | High | 2 | 13 | 310 |
 
 ## Repository structure
