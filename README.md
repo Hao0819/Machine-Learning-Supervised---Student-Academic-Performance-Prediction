@@ -258,22 +258,19 @@ Rows are actual classes and columns are predicted classes.
 |-- decisionTree.ipynb
 |-- KNN.ipynb
 |-- LogisticRegression.ipynb
-|-- app.py                 web interface (Logistic Regression), needs Python + Flask
-|-- run_app.bat            Windows launcher for app.py
-|-- predictor.html         standalone interface, double-click to open, no install needed
+|-- predictor.html         user interface, double-click to open, nothing to install
 |-- build_predictor.py     regenerates predictor.html from the trained model
-|-- verify_predictor.js    checks predictor.html against scikit-learn (needs Node)
-|-- templates/
-|   |-- layout.html
-|   |-- index.html
-|   `-- result.html
-`-- static/
-    `-- style.css
+|-- verify_predictor.js    checks predictor.html against scikit-learn (needs Node.js)
+`-- predictor_check.json   test data used by verify_predictor.js
 ```
 
 Jupyter checkpoint files and local `.bak` files are development artifacts and are not required for submission.
 
 ## Requirements
+
+The user interface (`predictor.html`) needs **nothing installed** &mdash; only a web browser.
+
+The following are needed to open the notebooks and to rebuild `predictor.html`:
 
 - Python 3
 - Jupyter Notebook or JupyterLab
@@ -281,7 +278,6 @@ Jupyter checkpoint files and local `.bak` files are development artifacts and ar
 - NumPy
 - Matplotlib
 - scikit-learn
-- Flask (only for the web interface)
 
 Install everything with:
 
@@ -292,7 +288,7 @@ pip install -r requirements.txt
 Or install the packages individually:
 
 ```bash
-pip install pandas numpy matplotlib scikit-learn jupyter flask
+pip install pandas numpy matplotlib scikit-learn jupyter
 ```
 
 ## How to run
@@ -315,66 +311,40 @@ jupyter notebook
 
 KNN performs 960 cross-validation fits in its current search grid, so it may take longer to run than the other notebooks.
 
-## How to run the web interface
+## Graphical user interface: `predictor.html`
 
-`app.py` is a small Flask application that lets a student enter their own factors in a browser
-and receive a predicted performance class together with an explanation of the result. It loads
-the same pipeline, the same engineered features, and the same tuned hyperparameters used in
-`LogisticRegression.ipynb`, so the prediction on screen matches the notebook.
+`predictor.html` lets a student enter their own factors in a browser and receive a predicted
+performance class together with an explanation of the result.
 
-**Windows:** double-click `run_app.bat`.
+**To use it: double-click `predictor.html`.** That is the whole procedure. It needs no Python, no
+web server, no terminal, and no installation, and it works offline, so the file can be copied to
+any computer or sent to someone directly.
 
-**Any operating system:** open a terminal in this folder and run
+This is possible because Logistic Regression predicts with a plain weighted sum.
+`build_predictor.py` trains the model from `StudentPerformanceFactors.csv` and writes the numbers
+the browser needs into the page: the imputation values, the scaler statistics, the one-hot
+category order, and the fitted coefficients. The JavaScript in the page then applies them in the
+same order scikit-learn does, so the interface and `LogisticRegression.ipynb` give the same
+answers.
+
+### Rebuilding the page
+
+Only needed after retraining or changing the model:
 
 ```bash
 pip install -r requirements.txt
-python app.py
-```
-
-The window prints the address to open, normally <http://127.0.0.1:5000>. If port 5000 is already
-in use the app moves to the next free port and prints that address instead.
-
-Notes:
-
-- The model is trained when the app starts, which takes a few seconds. Wait for the line
-  `Model ready.` before opening the browser.
-- Keep the terminal window open while using the app. Closing it, or pressing `CTRL+C`, stops the
-  server, and the browser will then report `ERR_CONNECTION_REFUSED`.
-- `StudentPerformanceFactors.csv` must stay in the same folder as `app.py`. The path is resolved
-  relative to `app.py`, so the app can be started from any working directory.
-- If `python` is not recognised, use the full path to your interpreter, for example
-  `"%USERPROFILE%\anaconda3\python.exe" app.py` on Windows.
-
-### Standalone version: `predictor.html`
-
-`predictor.html` is the same interface as a single self-contained file. **Double-click it and it
-opens in any browser.** It needs no Python, no Flask, no terminal, and no installation, so it can
-be copied to another computer or sent to someone directly.
-
-This works because Logistic Regression predicts with a plain weighted sum. `build_predictor.py`
-trains the model, exports the imputation values, the scaler statistics, the one-hot category
-order, and the fitted coefficients into the page, and the page applies them in the same order in
-JavaScript.
-
-To regenerate it after retraining the model:
-
-```bash
 python build_predictor.py     # writes predictor.html and predictor_check.json
-node verify_predictor.js      # checks the page against scikit-learn (optional)
+node verify_predictor.js      # checks the page against scikit-learn (optional, needs Node.js)
 ```
 
-The verification runs all 1,322 held-out test students through the JavaScript in the page and
-compares each result with the prediction scikit-learn produced for the same student. The current
-build reports **0 mismatches** and a largest probability difference of **1.55e-15**, which is
-ordinary floating-point rounding, so the page and the notebook give the same answers.
+`verify_predictor.js` extracts the JavaScript from the generated page, runs all 1,322 held-out
+test students through it, and compares each result with the prediction scikit-learn produced for
+the same student. The current build reports **0 mismatches** and a largest probability difference
+of **1.55e-15**, which is ordinary floating-point rounding, so the page reproduces the notebook
+exactly.
 
-| | `app.py` (Flask) | `predictor.html` (standalone) |
-|---|---|---|
-| Needs Python and Flask | Yes | No |
-| Needs a terminal | Yes | No |
-| Can be sent to someone else | They must install and run it | Yes, it is one file |
-| Runs the live scikit-learn model | Yes | No, it uses the exported coefficients |
-| Must be rebuilt after retraining | No | Yes, run `build_predictor.py` |
+`predictor_check.json` holds the test records and scikit-learn's predictions for that check. It is
+regenerated by `build_predictor.py` and is not needed to use the interface.
 
 ### What the interface does
 

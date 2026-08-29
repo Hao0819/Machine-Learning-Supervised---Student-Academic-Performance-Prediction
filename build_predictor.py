@@ -4,9 +4,9 @@ Build a standalone, single-file version of the prediction interface.
 
 BMCS2203 Artificial Intelligence - Logistic Regression module
 
-`app.py` needs Python and Flask running in the background. This script produces
-`predictor.html`, a single file that runs entirely in the browser: no Python, no
-server, no installation. Anyone can double-click it and use the predictor.
+This script produces `predictor.html`, the graphical interface for the project: a
+single file that runs entirely in the browser, with no Python, no web server, and
+no installation. Anyone can double-click it and use the predictor.
 
 This is possible because Logistic Regression predicts with a plain weighted sum.
 The script trains exactly the same pipeline used in `LogisticRegression.ipynb`,
@@ -44,25 +44,106 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-# The model definition is shared with the Flask app so the two cannot drift apart.
-from app import (
-    BEST_PARAMETERS,
-    CLASS_RANK,
-    DISPLAY_ORDER,
-    ENGINEERED_FEATURES,
-    FEATURE_LABELS,
-    FIELD_GROUPS,
-    SUPPORT_MAP,
-    ACTIONABLE_NUMERIC,
-    ACTIONABLE_ORDINAL,
-    COMBINED_PLAN,
-    PROJECT_FOLDER,
-    DATA_FILE,
-    add_engineered_features,
-)
+# Resolved against this file's own folder, so the script runs from any directory.
+PROJECT_FOLDER = Path(__file__).resolve().parent
+DATA_FILE = PROJECT_FOLDER / "StudentPerformanceFactors.csv"
+
+# Model definition, identical to LogisticRegression.ipynb.
+# Best hyperparameters selected by GridSearchCV in the notebook (Section 5).
+BEST_PARAMETERS = {"C": 100, "solver": "lbfgs", "class_weight": None}
+
+DISPLAY_ORDER = ["Low", "Medium", "High"]
+CLASS_RANK = {"Low": 0, "Medium": 1, "High": 2}
+
+SUPPORT_MAP = {"Low": 0, "Medium": 1, "High": 2}
+ENGINEERED_FEATURES = ["Support_Index", "Study_Consistency"]
+
+# Readable labels shown in the interface instead of raw column names.
+FEATURE_LABELS = {
+    "Hours_Studied": "Hours studied per week",
+    "Attendance": "Class attendance (%)",
+    "Parental_Involvement": "Parental involvement",
+    "Access_to_Resources": "Access to learning resources",
+    "Extracurricular_Activities": "Extracurricular activities",
+    "Sleep_Hours": "Sleep hours per night",
+    "Previous_Scores": "Previous exam scores",
+    "Motivation_Level": "Motivation level",
+    "Internet_Access": "Internet access",
+    "Tutoring_Sessions": "Tutoring sessions per month",
+    "Family_Income": "Family income",
+    "Teacher_Quality": "Teacher quality",
+    "School_Type": "School type",
+    "Peer_Influence": "Peer influence",
+    "Physical_Activity": "Physical activity (hours/week)",
+    "Learning_Disabilities": "Learning disabilities",
+    "Parental_Education_Level": "Parental education level",
+    "Distance_from_Home": "Distance from home to school",
+    "Gender": "Gender",
+    "Support_Index": "Overall support level (parents + resources + teacher)",
+    "Study_Consistency": "Study consistency (hours studied x attendance)",
+}
+
+# How the 19 input fields are grouped on the form, matching the categories used in the
+# project README so the interface reads in a logical order.
+FIELD_GROUPS = [
+    ("Academic", [
+        "Hours_Studied", "Attendance", "Previous_Scores",
+        "Tutoring_Sessions", "Extracurricular_Activities",
+    ]),
+    ("Personal", [
+        "Sleep_Hours", "Motivation_Level", "Physical_Activity",
+        "Learning_Disabilities", "Peer_Influence", "Gender",
+    ]),
+    ("Family", [
+        "Parental_Involvement", "Family_Income", "Parental_Education_Level",
+    ]),
+    ("School and resources", [
+        "Access_to_Resources", "Teacher_Quality", "School_Type",
+        "Internet_Access", "Distance_from_Home",
+    ]),
+]
+
+# Fields a student can realistically change, used for the what-if analysis.
+# Each entry lists the improved values to try, from the current value upwards.
+ACTIONABLE_NUMERIC = {
+    "Hours_Studied": [2, 5, 8, 12],      # additional hours per week to try
+    "Attendance": [5, 10, 15, 25],       # additional percentage points to try
+    "Tutoring_Sessions": [1, 2, 3, 4],   # additional sessions per month to try
+    "Sleep_Hours": [1, 2],               # additional hours per night to try
+}
+
+# Used when no single change is enough on its own. The improvements are applied one after
+# another, in this order, until the predicted class changes.
+COMBINED_PLAN = [
+    ("Attendance", "add", 20),
+    ("Hours_Studied", "add", 12),
+    ("Tutoring_Sessions", "add", 3),
+    ("Motivation_Level", "set", "High"),
+    ("Access_to_Resources", "set", "High"),
+    ("Parental_Involvement", "set", "High"),
+]
+
+ACTIONABLE_ORDINAL = {
+    "Motivation_Level": ["Low", "Medium", "High"],
+    "Access_to_Resources": ["Low", "Medium", "High"],
+    "Parental_Involvement": ["Low", "Medium", "High"],
+    "Extracurricular_Activities": ["No", "Yes"],
+}
+
+
+def add_engineered_features(frame):
+    """Add the two features engineered in Section 2 of the notebook."""
+    frame = frame.copy()
+    frame["Support_Index"] = (
+        frame["Parental_Involvement"].map(SUPPORT_MAP)
+        + frame["Access_to_Resources"].map(SUPPORT_MAP)
+        + frame["Teacher_Quality"].map(SUPPORT_MAP)
+    )
+    frame["Study_Consistency"] = frame["Hours_Studied"] * frame["Attendance"] / 100
+    return frame
+
 
 OUTPUT_FILE = PROJECT_FOLDER / "predictor.html"
-STYLE_FILE = PROJECT_FOLDER / "static" / "style.css"
 
 
 def train_and_export():
@@ -194,7 +275,7 @@ def train_and_export():
             for column in input_categorical
         },
 
-        # What-if settings, shared with the Flask app.
+        # Settings for the what-if analysis on the results page.
         "actionableNumeric": ACTIONABLE_NUMERIC,
         "actionableOrdinal": ACTIONABLE_ORDINAL,
         "combinedPlan": [[f, m, a] for f, m, a in COMBINED_PLAN],
@@ -210,6 +291,498 @@ def train_and_export():
     }
 
     return export, model, X_test, y_test
+
+
+PAGE_STYLE = r"""
+/* Student Academic Performance Prediction - interface styles */
+
+:root {
+    --page: #f4f6fa;
+    --card: #ffffff;
+    --ink: #1c2536;
+    --muted: #5d6b82;
+    --line: #dde3ed;
+    --brand: #2f5d8c;
+    --brand-dark: #234869;
+    --good: #2f855a;
+    --good-soft: #d6f0e2;
+    --warn: #b7791f;
+    --bad: #b03a3a;
+    --bad-soft: #fadfdf;
+    --low: #d97706;
+    --medium: #2f6fb0;
+    --high: #2f855a;
+    --radius: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0 0 60px;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+}
+
+.page {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ---------- header ---------- */
+
+.masthead {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+    color: #ffffff;
+    padding: 28px 0 24px;
+    margin-bottom: 26px;
+}
+
+.masthead h1 {
+    margin: 0 0 6px;
+    font-size: 26px;
+    letter-spacing: 0.2px;
+}
+
+.masthead p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.badges {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12.5px;
+}
+
+/* ---------- cards ---------- */
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 22px;
+}
+
+.card h2 {
+    margin: 0 0 4px;
+    font-size: 19px;
+}
+
+.card h3 {
+    margin: 22px 0 10px;
+    font-size: 16px;
+}
+
+.card .lead {
+    margin: 0 0 18px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.notice {
+    background: #fff8e6;
+    border: 1px solid #f0dca8;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* ---------- form ---------- */
+
+fieldset {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 0 0 8px;
+    padding: 18px 0 4px;
+}
+
+fieldset:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+legend {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--brand);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.field label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--ink);
+}
+
+.field input:focus,
+.field select:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+    border-color: var(--brand);
+}
+
+.field .hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.field.has-error input,
+.field.has-error select {
+    border-color: var(--bad);
+    background: #fff7f7;
+}
+
+.field .error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--bad);
+    font-weight: 600;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.button {
+    display: inline-block;
+    background: var(--brand);
+    color: #fff;
+    border: 1px solid var(--brand);
+    border-radius: 7px;
+    padding: 10px 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button:hover {
+    background: var(--brand-dark);
+}
+
+.button.secondary {
+    background: #fff;
+    color: var(--brand);
+}
+
+.button.secondary:hover {
+    background: #eef3f9;
+}
+
+/* ---------- result ---------- */
+
+.verdict {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    margin-bottom: 20px;
+}
+
+.verdict.Low {
+    background: #fff5e8;
+    border-color: #f2d0a4;
+}
+
+.verdict.Medium {
+    background: #eef4fb;
+    border-color: #bdd4ec;
+}
+
+.verdict.High {
+    background: #eaf7f0;
+    border-color: #b3e0c8;
+}
+
+.verdict .class-name {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.verdict.Low .class-name { color: var(--low); }
+.verdict.Medium .class-name { color: var(--medium); }
+.verdict.High .class-name { color: var(--high); }
+
+.verdict .detail {
+    font-size: 14px;
+    color: var(--muted);
+    max-width: 620px;
+}
+
+.probability {
+    margin-bottom: 12px;
+}
+
+.probability .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.probability .name {
+    width: 74px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.probability .track {
+    display: block;
+    flex: 1;
+    background: #eceff5;
+    border-radius: 999px;
+    height: 15px;
+    overflow: hidden;
+}
+
+/* display:block is required: a span is inline by default, and an inline element
+   ignores width and height, so the coloured bar would never be drawn. */
+.probability .fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.probability .fill.Low { background: var(--low); }
+.probability .fill.Medium { background: var(--medium); }
+.probability .fill.High { background: var(--high); }
+
+.probability .value {
+    width: 62px;
+    text-align: right;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------- explanation ---------- */
+
+.factors {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.factors th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding: 0 10px 7px 0;
+}
+
+.factors td {
+    padding: 9px 10px 9px 0;
+    border-bottom: 1px solid #eef1f6;
+    vertical-align: middle;
+}
+
+.factors .factor-name {
+    font-weight: 600;
+}
+
+.factors .factor-value {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.factors .bar-cell {
+    width: 180px;
+}
+
+.factors .bar {
+    height: 11px;
+    border-radius: 999px;
+    min-width: 3px;
+}
+
+.factors .bar.positive { background: var(--good); }
+.factors .bar.negative { background: var(--bad); }
+
+.factors .amount {
+    width: 66px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 26px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.tag.positive {
+    background: var(--good-soft);
+    color: var(--good);
+}
+
+.tag.negative {
+    background: var(--bad-soft);
+    color: var(--bad);
+}
+
+/* ---------- suggestions ---------- */
+
+.suggestion {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--brand);
+    border-radius: 7px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.suggestion.flip {
+    border-left-color: var(--good);
+    background: #f4fbf7;
+}
+
+.suggestion .gain {
+    color: var(--muted);
+    font-size: 13px;
+    display: block;
+    margin-top: 3px;
+}
+
+/* ---------- answers ---------- */
+
+details {
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 12px 15px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.answers {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 12px;
+}
+
+.answers td {
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid #eef1f6;
+}
+
+.answers td:last-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+    font-size: 12.5px;
+    color: var(--muted);
+    text-align: center;
+    padding-top: 4px;
+}
+
+.footer code {
+    background: #e8ecf3;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.disclaimer {
+    background: #f0f3f8;
+    border-radius: 7px;
+    padding: 12px 15px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+    .verdict .class-name { font-size: 28px; }
+    .factors .bar-cell { width: 90px; }
+}
+
+.suggestion .steps {
+    margin: 8px 0 4px;
+    padding-left: 20px;
+    font-size: 13.5px;
+    color: var(--ink);
+}
+
+.suggestion .steps li {
+    margin-bottom: 3px;
+}
+"""
 
 
 PAGE_SCRIPT = r"""
@@ -483,7 +1056,7 @@ function runWhatIf(record, predictedClass) {
     }];
 }
 
-// --- Step 6: validation, the same rules the Flask version applies -------------
+// --- Step 6: validation, applied before any prediction is made ---------------
 function validate(form) {
     const record = {};
     const errors = {};
@@ -836,8 +1409,6 @@ __SCRIPT__
 
 
 def build_page(export):
-    style = STYLE_FILE.read_text(encoding="utf-8")
-
     # The JSON sits inside a <script> tag, so the only sequence that could break out
     # of it must be neutralised.
     model_json = json.dumps(
@@ -845,7 +1416,7 @@ def build_page(export):
     ).replace("</", "<\\/")
 
     page = PAGE_TEMPLATE
-    page = page.replace("__STYLE__", style)
+    page = page.replace("__STYLE__", PAGE_STYLE)
     page = page.replace("__SCRIPT__", PAGE_SCRIPT)
     page = page.replace("__MODEL_JSON__", model_json)
     page = page.replace("__C__", export["bestParameters"]["C"])

@@ -1,11 +1,12 @@
-# Packages needed to run the notebooks and the web interface (app.py).
+# Packages needed to run the notebooks and to rebuild predictor.html.
 # Install with:  pip install -r requirements.txt
+#
+# predictor.html itself needs nothing installed. Just open it in a browser.
 
 pandas>=2.0
 numpy>=1.24
 scikit-learn>=1.3
 matplotlib>=3.7
-flask>=3.0
 
 # Only needed to open the .ipynb notebooks
 notebook>=7.0
