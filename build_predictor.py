@@ -155,6 +155,18 @@ def train_and_export():
         labels=DISPLAY_ORDER,
         ordered=True,
     )
+
+    # Class balancing, identical to Section 1 of the notebook: undersample every
+    # class to the smallest class size with the same seed, so the browser model is
+    # trained on exactly the same 4,356 students as the notebook.
+    smallest_class_size = int(data["Performance"].value_counts().min())
+    balanced_index = (
+        data.groupby("Performance", observed=True)
+            .sample(n=smallest_class_size, random_state=42)
+            .index
+    )
+    data = data.loc[balanced_index].sort_index().reset_index(drop=True)
+
     data = add_engineered_features(data)
 
     features = data.drop(columns=["Exam_Score", "Performance"])

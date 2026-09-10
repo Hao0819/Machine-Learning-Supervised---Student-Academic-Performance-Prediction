@@ -60,24 +60,9 @@ The output is the `Performance` class created from `Exam_Score`:
 
 ## Dataset
 
-The repository holds two copies of the data:
+The included `StudentPerformanceFactors.csv` is the untouched Kaggle download:
 
-| File | Records | Purpose |
-|---|---:|---|
-| `StudentPerformanceFactors_original.csv` | 6,607 | Untouched Kaggle download, kept for reference |
-| `StudentPerformanceFactors.csv` | 4,356 | **Class-balanced** file that all three notebooks read |
-
-The raw download is skewed towards `Medium` (Low 1,452 / Medium 3,530 / High 1,625, i.e.
-22% / 53% / 25%), so a model that always predicts `Medium` already scores 53%. Following the
-tutor's instruction to work on balanced data, `balance_dataset.py` randomly undersamples each
-class to the size of the smallest class (`Low`, 1,452 records) with a fixed seed
-(`random_state=42`), giving exactly 1,452 records per class. The class cut points are unchanged.
-Running the script again reproduces the identical file, so every group member trains on the same
-4,356 rows.
-
-The balanced file contains:
-
-- 4,356 student records (1,452 per class)
+- 6,607 student records
 - 20 original attributes
 - Numerical and categorical variables
 - No fully duplicated rows
@@ -86,9 +71,24 @@ Missing values are present in three categorical attributes:
 
 | Attribute | Missing values |
 |---|---:|
-| `Teacher_Quality` | 44 |
-| `Parental_Education_Level` | 65 |
-| `Distance_from_Home` | 43 |
+| `Teacher_Quality` | 78 |
+| `Parental_Education_Level` | 90 |
+| `Distance_from_Home` | 67 |
+
+### Class balancing
+
+The raw file is skewed towards `Medium` (Low 1,452 / Medium 3,530 / High 1,625, i.e.
+22% / 53% / 25%), so a model that always predicts `Medium` already scores 53%. Following the
+tutor's instruction to work on balanced data, **each notebook undersamples the classes in its
+data-preparation section**: every class is randomly reduced to the size of the smallest class
+(`Low`, 1,452 records) with `random_state=42`, giving exactly 1,452 records per class and 4,356
+records in total. The class cut points are unchanged. Because all three notebooks use the same
+seed and the same method, they keep exactly the same 4,356 students, and the shared split below
+produces the same 872 test records for every model. `build_predictor.py` applies the identical
+step before training the browser model.
+
+After balancing, the missing-value counts are `Teacher_Quality` 44, `Parental_Education_Level`
+65, and `Distance_from_Home` 43.
 
 The project documentation identifies the dataset as a public Kaggle dataset. The exact original dataset page should also be cited in the final report and AI/source disclosure materials.
 
@@ -287,9 +287,7 @@ Rows are actual classes and columns are predicted classes.
 .
 |-- README.md
 |-- requirements.txt
-|-- StudentPerformanceFactors.csv           class-balanced data used by all notebooks
-|-- StudentPerformanceFactors_original.csv  untouched Kaggle download
-|-- balance_dataset.py                      regenerates the balanced file from the original
+|-- StudentPerformanceFactors.csv
 |-- decisionTree.ipynb
 |-- KNN.ipynb
 |-- LogisticRegression.ipynb
@@ -329,7 +327,7 @@ pip install pandas numpy matplotlib scikit-learn jupyter
 ## How to run
 
 1. Clone or download this repository.
-2. Keep `StudentPerformanceFactors.csv` in the same directory as the notebooks. It is already the balanced file; only run `python balance_dataset.py` if you need to regenerate it from the original.
+2. Keep `StudentPerformanceFactors.csv` in the same directory as the notebooks. Each notebook balances the classes itself, so the file should stay as downloaded.
 3. Start Jupyter Notebook or JupyterLab.
 4. Open one of the model notebooks.
 5. Select **Restart Kernel and Run All Cells**.
