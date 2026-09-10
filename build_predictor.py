@@ -50,7 +50,7 @@ DATA_FILE = PROJECT_FOLDER / "StudentPerformanceFactors.csv"
 
 # Model definition, identical to LogisticRegression.ipynb.
 # Best hyperparameters selected by GridSearchCV in the notebook (Section 5).
-BEST_PARAMETERS = {"C": 100, "solver": "lbfgs", "class_weight": None}
+BEST_PARAMETERS = {"C": 100, "solver": "newton-cg", "class_weight": None}
 
 DISPLAY_ORDER = ["Low", "Medium", "High"]
 CLASS_RANK = {"Low": 0, "Medium": 1, "High": 2}

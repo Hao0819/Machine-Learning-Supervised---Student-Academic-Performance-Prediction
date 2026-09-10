@@ -60,20 +60,35 @@ The output is the `Performance` class created from `Exam_Score`:
 
 ## Dataset
 
-The included `StudentPerformanceFactors.csv` contains:
+The repository holds two copies of the data:
 
-- 6,607 student records
+| File | Records | Purpose |
+|---|---:|---|
+| `StudentPerformanceFactors_original.csv` | 6,607 | Untouched Kaggle download, kept for reference |
+| `StudentPerformanceFactors.csv` | 4,356 | **Class-balanced** file that all three notebooks read |
+
+The raw download is skewed towards `Medium` (Low 1,452 / Medium 3,530 / High 1,625, i.e.
+22% / 53% / 25%), so a model that always predicts `Medium` already scores 53%. Following the
+tutor's instruction to work on balanced data, `balance_dataset.py` randomly undersamples each
+class to the size of the smallest class (`Low`, 1,452 records) with a fixed seed
+(`random_state=42`), giving exactly 1,452 records per class. The class cut points are unchanged.
+Running the script again reproduces the identical file, so every group member trains on the same
+4,356 rows.
+
+The balanced file contains:
+
+- 4,356 student records (1,452 per class)
 - 20 original attributes
 - Numerical and categorical variables
-- No fully duplicated rows in the current dataset
+- No fully duplicated rows
 
 Missing values are present in three categorical attributes:
 
 | Attribute | Missing values |
 |---|---:|
-| `Teacher_Quality` | 78 |
-| `Parental_Education_Level` | 90 |
-| `Distance_from_Home` | 67 |
+| `Teacher_Quality` | 44 |
+| `Parental_Education_Level` | 65 |
+| `Distance_from_Home` | 43 |
 
 The project documentation identifies the dataset as a public Kaggle dataset. The exact original dataset page should also be cited in the final report and AI/source disclosure materials.
 
@@ -93,7 +108,7 @@ train_test_split(
 
 - 80% training data
 - 20% held-out testing data
-- 1,322 test records
+- 872 test records (3,484 training records)
 - Class order fixed as `Low`, `Medium`, `High`
 - Five-fold `StratifiedKFold` cross-validation for hyperparameter selection
 - Preprocessing fitted inside each model Pipeline to prevent data leakage
@@ -126,7 +141,7 @@ Both the Decision Tree and the KNN notebooks derive the same two additional feat
 
 Both are computed row by row, so no information crosses between records and the train/test split remains valid. The same definitions are used in both notebooks, so the feature set stays consistent across models.
 
-The effect was measured, not assumed. Adding the two features on an identical split and search space raised Decision Tree accuracy from 76.32% to 78.06% and KNN accuracy from 82.30% to 84.80%. For KNN the gain comes with a trade-off: overall accuracy and macro F1 improve, but Low-class recall falls from 67.01% to 61.17% because the extra separation makes the model commit harder to the majority Medium class.
+The effect was measured, not assumed. On the earlier unbalanced dataset the two features raised Decision Tree accuracy from 76.32% to 78.06% and KNN accuracy from 82.30% to 84.80%. On the balanced dataset the picture is more mixed: for Logistic Regression the features no longer add anything measurable (93.23% with them against 94.38% without on the test split; 95.44% against 95.87% in cross-validation, a gap smaller than the fold-to-fold standard deviation of 0.75), because a linear model can already represent `Hours_Studied` and `Attendance` separately. The features are kept so that all three models see the same inputs. The Decision Tree and KNN ablation figures on the balanced data are to be re-measured in their own notebooks.
 
 ## Model implementations
 
@@ -149,10 +164,10 @@ criterion = gini
 max_depth = 10
 min_samples_leaf = 1
 min_samples_split = 5
-ccp_alpha = 0.000578
+ccp_alpha = 0.000684
 ```
 
-The selected model reaches 77.98% cross-validated accuracy (macro F1 77.06%). A pruning curve (training vs. cross-validation accuracy across `ccp_alpha`) is included in the notebook to show the bias-variance trade-off directly.
+The selected model reaches 78.16% cross-validated accuracy and has 151 leaves after pruning. A pruning curve (training vs. cross-validation accuracy across `ccp_alpha`) is included in the notebook to show the bias-variance trade-off directly.
 
 ### K-Nearest Neighbors
 
@@ -169,10 +184,12 @@ Best parameters in the current run:
 
 ```text
 selected transformed features = 20
-n_neighbors = 31
+n_neighbors = 51
 weights = distance
 p = 2 (Euclidean distance)
 ```
+
+The selected model reaches 87.23% cross-validated accuracy.
 
 The selected transformed features mainly originate from attendance, study hours, previous scores, tutoring sessions, access to resources, parental involvement, learning disabilities, and parental education level.
 
@@ -188,9 +205,11 @@ Best parameters in the current run:
 
 ```text
 C = 100
-solver = lbfgs
+solver = newton-cg
 class_weight = None
 ```
+
+The selected model reaches 95.44% cross-validated accuracy (macro F1 95.42%). `class_weight="balanced"` was in the grid but was not selected, which is consistent with the dataset already being balanced.
 
 ## Evaluation metrics
 
@@ -205,7 +224,7 @@ class_weight = None
 | Weighted average | Weights each class by its number of test records |
 | Confusion matrix | Shows correct predictions and specific class errors |
 
-Macro metrics and balanced accuracy are important because the Medium class contains more records than Low and High.
+Because the dataset is balanced, plain accuracy, balanced accuracy, and the macro averages should agree closely; a large gap between them would indicate that a model is favouring one class.
 
 ## Current results
 
@@ -213,11 +232,24 @@ All values below come from the saved outputs in the current notebooks.
 
 | Model | Test accuracy | Balanced accuracy | Macro precision | Macro recall | Macro F1 | Weighted F1 |
 |---|---:|---:|---:|---:|---:|---:|
-| Decision Tree | 78.06% | 76.50% | 77.57% | 76.50% | 77.00% | 77.99% |
-| KNN | 84.80% | 79.19% | 89.92% | 79.19% | 82.75% | 84.27% |
-| Logistic Regression | **96.97%** | **96.54%** | **97.12%** | **96.54%** | **96.82%** | **96.97%** |
+| Majority-class baseline | 33.26% | 33.33% | - | - | - | - |
+| Decision Tree | 75.23% | 75.23% | 75.15% | 75.23% | 75.19% | 75.18% |
+| KNN | 86.93% | 86.93% | 87.02% | 86.93% | 86.63% | 86.63% |
+| Logistic Regression | **93.23%** | **93.24%** | **93.22%** | **93.24%** | **93.20%** | **93.20%** |
 
-Logistic Regression currently produces the strongest overall performance on this dataset (96.97%), followed by KNN (84.80%), with Decision Tree behind both (78.06%). This ranking is consistent with the target being derived from a roughly linear combination of the numeric predictors: Logistic Regression fits that boundary directly, while Decision Tree can only approximate it with axis-aligned threshold splits. Decision Tree still has the smallest class-distribution distortion of the three models and the most directly interpretable predictions.
+Per-class recall on the same test set:
+
+| Model | Low | Medium | High |
+|---|---:|---:|---:|
+| Decision Tree | 83.51% | 63.23% | 78.97% |
+| KNN | 95.88% | 72.85% | 92.07% |
+| Logistic Regression | **97.25%** | **87.97%** | **94.48%** |
+
+Logistic Regression produces the strongest overall performance on the balanced dataset (93.23%), followed by KNN (86.93%), with Decision Tree behind both (75.23%). The ranking is the same as on the unbalanced data, so it is not an artefact of the class distribution. This ranking is consistent with the target being derived from a roughly linear combination of the numeric predictors: Logistic Regression fits that boundary directly, while Decision Tree can only approximate it with axis-aligned threshold splits.
+
+`Medium` is the hardest class for every model because it is the only class bounded on both sides (65-69), and it is where the three models differ most: the Decision Tree recovers 63% of Medium students, KNN 73%, and Logistic Regression 88%.
+
+Balancing changed the absolute numbers. Against the earlier unbalanced results (Decision Tree 78.06%, KNN 84.80%, Logistic Regression 96.97%), the Decision Tree and Logistic Regression both lost accuracy because a third of the records were removed, while KNN gained because its neighbourhoods are no longer dominated by `Medium` records. The baseline also fell from 53.40% to 33.26%, so every model's margin over "always guess the biggest class" is now larger.
 
 All three models are trained and evaluated on the identical split (`test_size=0.20`, `random_state=42`, `stratify=y`) and the identical `StratifiedKFold(5, shuffle=True, random_state=42)` cross-validation, so the table compares like with like.
 
@@ -229,25 +261,25 @@ Rows are actual classes and columns are predicted classes.
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 198 | 93 | 0 |
-| Medium | 72 | 573 | 61 |
-| High | 1 | 63 | 261 |
+| Low | 243 | 48 | 0 |
+| Medium | 48 | 184 | 59 |
+| High | 6 | 55 | 229 |
 
 #### KNN
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 178 | 113 | 0 |
-| Medium | 5 | 685 | 16 |
-| High | 2 | 65 | 258 |
+| Low | 279 | 12 | 0 |
+| Medium | 29 | 212 | 50 |
+| High | 6 | 17 | 267 |
 
 #### Logistic Regression
 
 | Actual / Predicted | Low | Medium | High |
 |---|---:|---:|---:|
-| Low | 280 | 11 | 0 |
-| Medium | 6 | 692 | 8 |
-| High | 2 | 13 | 310 |
+| Low | 283 | 8 | 0 |
+| Medium | 11 | 256 | 24 |
+| High | 4 | 12 | 274 |
 
 ## Repository structure
 
@@ -255,7 +287,9 @@ Rows are actual classes and columns are predicted classes.
 .
 |-- README.md
 |-- requirements.txt
-|-- StudentPerformanceFactors.csv
+|-- StudentPerformanceFactors.csv           class-balanced data used by all notebooks
+|-- StudentPerformanceFactors_original.csv  untouched Kaggle download
+|-- balance_dataset.py                      regenerates the balanced file from the original
 |-- decisionTree.ipynb
 |-- KNN.ipynb
 |-- LogisticRegression.ipynb
@@ -295,7 +329,7 @@ pip install pandas numpy matplotlib scikit-learn jupyter
 ## How to run
 
 1. Clone or download this repository.
-2. Keep `StudentPerformanceFactors.csv` in the same directory as the notebooks.
+2. Keep `StudentPerformanceFactors.csv` in the same directory as the notebooks. It is already the balanced file; only run `python balance_dataset.py` if you need to regenerate it from the original.
 3. Start Jupyter Notebook or JupyterLab.
 4. Open one of the model notebooks.
 5. Select **Restart Kernel and Run All Cells**.
@@ -338,10 +372,10 @@ python build_predictor.py     # writes predictor.html and predictor_check.json
 node verify_predictor.js      # checks the page against scikit-learn (optional, needs Node.js)
 ```
 
-`verify_predictor.js` extracts the JavaScript from the generated page, runs all 1,322 held-out
+`verify_predictor.js` extracts the JavaScript from the generated page, runs all 872 held-out
 test students through it, and compares each result with the prediction scikit-learn produced for
 the same student. The current build reports **0 mismatches** and a largest probability difference
-of **1.55e-15**, which is ordinary floating-point rounding, so the page reproduces the notebook
+of **9.99e-16**, which is ordinary floating-point rounding, so the page reproduces the notebook
 exactly.
 
 `predictor_check.json` holds the test records and scikit-learn's predictions for that check. It is
@@ -403,7 +437,7 @@ The report should cover:
 
 - The target classes are project-defined from `Exam_Score`; they are not presented as a universal educational grading standard.
 - The dataset comes from a single public source and may not represent every institution or student population.
-- Medium is the largest class, so accuracy alone is insufficient for evaluating class-balanced performance.
+- The dataset was balanced by random undersampling, which discarded 2,251 of the 6,607 original records (34%). Class weighting or oversampling would keep all the data and may give different absolute numbers.
 - Results apply to the current dataset, target definition, preprocessing pipelines, hyperparameter grids, and held-out split.
 - External validation on data from other educational settings has not been performed.
 
